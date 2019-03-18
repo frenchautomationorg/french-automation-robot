@@ -1,0 +1,1 @@
+this.location.href='https://extranet.apivia-courtage.fr/modules/tarif_acs/detail_dossier.php';
