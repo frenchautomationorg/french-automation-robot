@@ -52,7 +52,7 @@ We encourage you to contribute to French Automation software suite.
 <br/>
 
 ## Licenses
-French Automation is released under the [GNU/AGPLv3](http://opensource.org/licenses/AGPL-3.0) license.
+French Automation is released under the [GNU General Public License version 3](http://opensource.org/licenses/GPL-3.0) license.
 
 
 
