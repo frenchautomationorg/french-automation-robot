@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>French Automation Robot</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+  </head>
+  <body>
+    
+    <!-- All of the Node.js APIs are available in this renderer process. -->
+    <div style="height: 575px; background: url('../img/background.png') no-repeat center center fixed; -webkit-background-size: cover; -moz-background-size: cover; -o-background-size: cover; background-size: cover;">
+      <center>
+        <img src="../assets/img/logo_fa.png" width="150px" style="padding-top:30px;" />
+        <h2><b>Automate N°<span id="id"></span></b></h2><br>
+        <span>En cours de traitement</span>
+        <div style="text-align: right; color: #fff; margin-top: 250px; padding-right: 15px;">French Automation IT &trade; - Version v1.0.0</div>
+      </center>
+    </div>
+
+    <script>
+      // You can also require other files to run in this process
+      require('../utils/renderer.js')
+    </script>
+    <script>
+      function testConnection() {
+        const { ipcRenderer } = require('electron')
+        ipcRenderer.sendSync('synchronous-message', 'testConnection')
+      }
+    </script>
+  </body>
+</html>
