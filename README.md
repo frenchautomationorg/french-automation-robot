@@ -45,8 +45,10 @@ We encourage you to contribute to French Automation software suite.
 
 ## See also
 <ul>
-  <li><a href="https://talk.frenchautomation.com/">Forum</a></li>
+  <li><a href="https://www.frenchautomation.com/default/concepts/">Concepts</a></li>
+  <li><a href="https://www.frenchautomation.com/default/overview/">Architecture</a></li>
   <li><a href="https://www.frenchautomation.com/default/tutorial/">Tutorial</a></li>
+  <li><a href="https://talk.frenchautomation.com/">Forum</a></li>
 </ul>
 
 <br/>
