@@ -3,7 +3,7 @@
 ## Overview
 French Automation is an Open Source RPA / RDA software suite based on :
 <ul>
-  <li>Newmips development Studio : https://www.newmips.com/</li>
+  <li>Newmips NodeJS development Studio : https://www.newmips.com/</li>
   <li>A web-based application called Orchestrator that manages Business activities and dispatches automated tasks between connected Robots</li>
   <li>An ElectronJS Robot that executes tasks on user desktop or remotely</li>
 </ul>
