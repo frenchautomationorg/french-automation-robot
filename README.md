@@ -45,10 +45,10 @@ We encourage you to contribute to French Automation software suite.
 
 ## See also
 <ul>
-  <li><a href="https://www.frenchautomation.com/default/concepts/" target="_blank">Concepts</a></li>
-  <li><a href="https://www.frenchautomation.com/default/methodology/" target="_blank">Methodology</a></li>
-  <li><a href="https://www.frenchautomation.com/default/overview/" target="_blank">Architecture</a></li>
-  <li><a href="https://www.frenchautomation.com/default/tutorial/" target="_blank">Tutorial</a></li>
+  <li><a href="https://www.frenchautomation.com/default/concepts" target="_blank">Concepts</a></li>
+  <li><a href="https://www.frenchautomation.com/default/rpa" target="_blank">Methodology</a></li>
+  <li><a href="https://www.frenchautomation.com/default/overview" target="_blank">Architecture</a></li>
+  <li><a href="https://www.frenchautomation.com/default/tutorial" target="_blank">Tutorial</a></li>
   <li><a href="https://talk.frenchautomation.com/" target="_blank">Forum</a></li>
 </ul>
 
