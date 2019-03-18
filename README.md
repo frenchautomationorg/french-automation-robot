@@ -1,2 +1,2 @@
-# french-automation-robot
+# French Automation Robot
 RPA Open Source French Automation
