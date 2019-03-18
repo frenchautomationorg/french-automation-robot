@@ -1,0 +1,1 @@
+location.href="https://extranet.apivia-courtage.fr/deconnexion.php?marque_blanche=";

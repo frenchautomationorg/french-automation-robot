@@ -1,0 +1,88 @@
+{
+	"firstStep": "login",
+	"steps": {
+		"login": {
+			"type": "script",
+			"startWith": {
+				"url": "https://pav1.services-fm.net/ExtranetPremiumApporteur/login",
+				"method": "GET"
+			},
+			"snippet": "script/step01.js",
+			"endType": "url",
+			"endWith": {
+				"url": "https://pav1.services-fm.net/ExtranetPremiumApporteur/extranet",
+				"method": "POST"
+			},
+			"next": "userInfo"
+		},
+		"userInfo": {
+			"type": "script",
+			"startWith": {
+				"url": "https://pav1.services-fm.net/ExtranetPremiumProspect/compo",
+				"method": "get"
+			},
+			"snippet": "script/step03.js",
+			"endType": "url",
+			"endWith": {
+				"url": "https://pav1.services-fm.net/ExtranetPremiumProspect/quest",
+				"method": "get"
+			},
+			"next": "selectGarantie"
+		},
+		"selectGarantie": {
+			"type": "script",
+			"snippet": "script/step04.js",
+			"endType": "url",
+			"endWith": {
+				"url": "https://pav1.services-fm.net/ExtranetPremiumProspect/prop",
+				"method": "get"
+			},
+			"next": "getGarantie"
+		},
+		"getGarantie": {
+			"type": "script",
+			"download": {
+				"url": "https://pav1.services-fm.net/ExtranetPremiumProspect/download?action=gie&code=WSHW11",
+				"method": "get",
+				"name": "garanties.pdf"
+			},
+			"endType": "download",
+			"timeout": 60000,
+			"next": "getDevis"
+		},
+		"getDevis": {
+			"type": "script",
+			"download": {
+				"url": "https://pav1.services-fm.net/ExtranetPremiumProspect/download?action=devis",
+				"method": "get",
+				"name": "devis.pdf"
+			},
+			"endType": "download",
+			"timeout": 60000,
+			"next": "something"
+		},
+		"something": {
+			"type": "script",
+			"snippet": "script/step05.js",
+			"endType": "url",
+			"endWith": {
+				"url": "https://pav1.services-fm.net/ExtranetPremiumProspect/recap",
+				"method": "get"
+			},
+			"next": "logout"
+		},
+		"logout": {
+			"type": "script",
+			"startWith": {
+				"url": "https://pav1.services-fm.net/ExtranetPremiumApporteur/logout",
+				"method": "get",
+				"expected": false
+			},
+			"endType": "url",
+			"endWith": {
+				"url": "https://pav1.services-fm.net/ExtranetPremiumApporteur/login",
+				"method": "get"
+			}
+		}
+	}
+}

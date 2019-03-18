@@ -1,0 +1,39 @@
+{
+	"taskStatus": {
+		"pending": 41,
+		"processing": 42,
+		"done": 43,
+		"failed": 44
+	},
+	"ignoreList": [
+		"/static-resources"
+	],
+	"firstStep": "start",
+	"steps": {
+		"start": {
+			"type": "script",
+			"startWith": {
+				"url": "http://sirene.fr/sirene/public/accueil",
+				"method": "GET"
+			},
+			"snippet": "script/step01.js",
+			"endType": "url",
+			"endWith": {
+				"url": "http://sirene.fr/sirene/public/recherche",
+				"method": "POST"
+			},
+			"next": "extractData"
+		},
+		"extractData": {
+			"type": "script",
+			"snippet": "script/step02.js",
+			"endType": "script",
+			"next": "updateAPI"
+		},
+		"updateAPI": {
+			"type": "sequence",
+			"timeout": 10000,
+			"snippet": "sequence/sequence01.js"
+		}
+	}
+}
