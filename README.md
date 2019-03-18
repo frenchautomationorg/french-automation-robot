@@ -37,7 +37,7 @@ We encourage you to contribute to French Automation software suite.
   <li>Start a feature/bugfix branch</li>
   <li>Commit and push until you are happy with your contribution</li>
   <li>Make sure to add tests for it. This is important so we don't break it in a future version unintentionally.</li>
-  <li>Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so we can cherry-pick around it.</li>
+  <li>Please try not to mess with the branches, versions, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so we can cherry-pick around it.</li>
  </ul>
 
 
