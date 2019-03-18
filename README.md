@@ -12,7 +12,7 @@ French Automation is an Open Source RPA / RDA software suite based on :
 <br/>
 
 ## Screenshot
-<p><img src="https://www.frenchautomation.com/img/robot_electron.png" width="75%" /></p>
+<p style="text-align: center;"><img src="https://www.frenchautomation.com/img/robot_electron.png" width="75%" /></p>
 
 <br/>
 
