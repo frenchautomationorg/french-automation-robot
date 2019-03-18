@@ -10,10 +10,12 @@ French Automation is an Open Source RPA / RDA software suite based on :
 <p> More details can be found on the official website : <a href="https://www.frenchautomation.com/" target="_blank" rel="nofollow">https://www.frenchautomation.com/</a></p>
 
 <br/>
+
 ## Screenshot
 <p><img src="https://www.frenchautomation.com/img/robot_electron.png" width="75%" /></p>
 
 <br/>
+
 ## Installation
 <p>Please refer to installation instructions and prerequisites on our Website : <a href="https://www.frenchautomation.com/default/robot" rel="nofollow">https://www.frenchautomation.com/default/robot</a></p>
 
@@ -25,6 +27,7 @@ French Automation is an Open Source RPA / RDA software suite based on :
 npm start</code></pre>
 
 <br/>
+
 ## Contribute
 We encourage you to contribute to French Automation software suite.
 <ul>
@@ -39,6 +42,7 @@ We encourage you to contribute to French Automation software suite.
 
 
 <br/>
+
 ## See also
 <ul>
   <li>[Forum](https://talk.frenchautomation.com/)</li>
@@ -46,6 +50,7 @@ We encourage you to contribute to French Automation software suite.
 </ul>
 
 <br/>
+
 ## Licenses
 French Automation is released under the [GNU/AGPLv3](http://opensource.org/licenses/AGPL-3.0) license.
 
