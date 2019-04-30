@@ -1,10 +1,4 @@
 {
-	"taskStatus": {
-		"pending": 41,
-		"processing": 42,
-		"done": 43,
-		"failed": 44
-	},
 	"ignoreList": [
 		"/static-resources"
 	],
