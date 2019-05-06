@@ -45,7 +45,33 @@
               <input class="form-control input" placeholder='' id="f_secret" name="f_secret" value="" type="password">
           </div>
       </div>
-      <div data-field="f_secret" class="col-xs-10 col-xs-offset-1">
+
+      <div data-field="f_pending" class="col-xs-5 col-xs-offset-1">
+          <div class="form-group">
+              <label for="f_pending"> ID du status "Pending" </label>
+              <input class="form-control input" placeholder='' id="f_pending" name="f_processing" value="" type="number">
+          </div>
+      </div>
+      <div data-field="f_processing" class="col-xs-5">
+          <div class="form-group">
+              <label for="f_processing"> ID du status "Processing" </label>
+              <input class="form-control input" placeholder='' id="f_processing" name="f_processing" value="" type="number">
+          </div>
+      </div>
+      <div data-field="f_failed" class="col-xs-5 col-xs-offset-1">
+          <div class="form-group">
+              <label for="f_failed"> ID du status "Failed" </label>
+              <input class="form-control input" placeholder='' id="f_failed" name="f_failed" value="" type="number">
+          </div>
+      </div>
+      <div data-field="f_done" class="col-xs-5">
+          <div class="form-group">
+              <label for="f_done"> ID du status "Done" </label>
+              <input class="form-control input" placeholder='' id="f_done" name="f_done" value="" type="number">
+          </div>
+      </div>
+
+      <div class="col-xs-10 col-xs-offset-1">
           <div class="form-group">
               <button class="btn btn-primary btn-lg" onclick="javascript:setConfig();"> Sauvegarder </button>
               <button class="btn btn-default btn-lg" onclick="javascript:history.back();"> Annuler </button>
@@ -70,10 +96,23 @@
         var server = document.getElementById('f_server').value
         var key = document.getElementById('f_key').value
         var secret = document.getElementById('f_secret').value
-        var json = { "action": "setConfig", "id": id, "back_host": server, "clientKey": key, "clientSecret": secret }
+        var processing = document.getElementById('f_processing').value;
+        var done = document.getElementById('f_done').value;
+        var pending = document.getElementById('f_pending').value;
+        var failed = document.getElementById('f_failed').value;
+        var json = {
+          action: "setConfig",
+          id: id,
+          back_host: server,
+          clientKey: key,
+          clientSecret: secret,
+          idPending: pending,
+          idProcessing: processing,
+          idFailed: failed,
+          idDone: done
+        }
         var message = ipcRenderer.sendSync('synchronous-message', json)
         alert(message);
-        // window.location.href='index.html';
       }
 
     </script>

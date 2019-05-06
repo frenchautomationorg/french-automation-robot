@@ -66,7 +66,7 @@ class ScriptStep extends Step {
     }
 
 	* _stepActionsIterator() {
-		console.log(this._startWith);
+		// Wait for starting url
 		if (this._startWith && this._startWith.expected == true) {
 			let startUrlMatched = false;
 			while (startUrlMatched == false) {
@@ -78,10 +78,13 @@ class ScriptStep extends Step {
 			}
 		}
 
+		// Execute script/download
 		if (this._snippet)
 			this._executeScript();
 		if (this._download)
 			this._window.webContents.downloadURL(this._download.url);
+
+		// Wait for ending url
 		if (this._endType == 'url') {
 			let endUrlMatched = false;
 			while (endUrlMatched == false) {
@@ -101,8 +104,8 @@ class ScriptStep extends Step {
 	// PUBLIC FUNCTIONS
 	//
 
-	/*async*/ init(environmentVars) {
-		return new Promise((resolve, reject) => {
+	async init(environmentVars) {
+		await new Promise((resolve, reject) => {
 			// No script file, normalize behavior with scriptFinish function
 			if (!this._snippet)
 				return resolve(SCRIPT_FINISH_FUNCTION+'\nscriptFinish();');
@@ -133,7 +136,7 @@ class ScriptStep extends Step {
 
             	resolve();
             }).on('error', reject);
-		})
+		});
 	}
 
 	execute() {
@@ -143,7 +146,7 @@ class ScriptStep extends Step {
 		this._urlAction.next();
 
 		// Trigger execution with starting url if provided
-		if (this._startWith)
+		if (this._startWith && this._startWith.url)
 			this._window.webContents.loadURL(this._startWith.url);
 	}
 
@@ -170,13 +173,13 @@ class ScriptStep extends Step {
 	domReady(isReady) {
 		this._domReady = isReady;
 		if (this._domReady == true) {
-
+			// Start pending executions
 			if (this._scriptWaiting == true)
 				this._executeScript();
-			if (this._downloadWaiting == true) {
-				this._downloadWaiting = false;
-				this._window.webContents.downloadURL(this._download.url);
-			}
+			// if (this._downloadWaiting == true) {
+			// 	this._downloadWaiting = false;
+			// 	this._window.webContents.downloadURL(this._download.url);
+			// }
 		}
 	}
 }

@@ -24,11 +24,6 @@ class Step {
 	// PUBLIC FUNCTIONS
 	//
 
-	// "virtual"
-	inputUrl(url) {
-		console.error("Step received url but is not supposed to : "+url);
-	}
-
 	success() {
 		clearTimeout(this._timeout);
 		this._success(this._sessionData);
@@ -36,6 +31,22 @@ class Step {
 
 	error(error) {
 		this._error(error);
+	}
+
+
+	//
+	// VIRTUAL FUNCTIONS
+	//
+
+	inputUrl(url) {
+		console.error("Step received url but is not supposed to : ");
+		console.error(url.url);
+	}
+	async init() {
+		console.error("Error: Step must implement init() function");
+	}
+	execute() {
+		console.error("Error: Step must implement execute() function");
 	}
 }
 

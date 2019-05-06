@@ -27,7 +27,8 @@
 		"updateAPI": {
 			"type": "sequence",
 			"timeout": 10000,
-			"snippet": "sequence/sequence01.js"
+			"snippet": "sequence/sequence01.js",
+			"endType": "script"
 		}
 	}
 }

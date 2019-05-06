@@ -7,6 +7,7 @@ const SequenceStep = require('./sequence_step');
 
 class Task {
 	constructor(task, robot) {
+		this._startTime = process.hrtime();
 		this._id = task.id;
 		this._state = task.r_state.id;
 		this._env = task.f_data_flow;
@@ -16,8 +17,6 @@ class Task {
 		this._sessionData = {};
 		this._loggedOut = false;
 		this._domReady = false;
-
-		this._startTime = process.hrtime();
 	}
 
 
@@ -25,17 +24,17 @@ class Task {
 	// STATIC
 	//
 
-	static get PROCESSING() {return 42;}
-	static get FINALIZING() {return -1;}
-	static get FAILED() {return 44;}
-	static get PROCESSED() {return 43;}
+	static get PENDING() {return api.credentials().idPending;}
+	static get PROCESSING() {return api.credentials().idProcessing;}
+	static get FAILED() {return api.credentials().idFailed;}
+	static get DONE() {return api.credentials().idDone;}
 
-	static async fetch(robotId) {
-		if (robotId == null)
+	static async fetch(robot) {
+		if (robot.id == null)
 			return null;
 
 		// Fetch task from API
-	    let result = await api.call({url: '/api/task?fk_id_robot_robot=' + robotId + '&fk_id_status_state=41&include=r_state&limit=1'});
+	    let result = await api.call({url: '/api/task?fk_id_robot_robot=' + robot.id + '&fk_id_status_state='+Task.PENDING+'&include=r_state&limit=1'});
 
         let tasks = result.body.tasks;
 
@@ -46,10 +45,10 @@ class Task {
         // Create task instance
         let task = new Task(result.body.tasks[0], robot);
 
-        // Indicate to orchestrator, task is now in process
-		await api.call({url: '/api/task/' + task.id, body: {r_state: task.PROCESSING}, method: 'put'});
+        // Indicate to orchestrator that task is now in process
+		await api.call({url: '/api/task/' + task.id, body: {r_state: Task.PROCESSING}, method: 'put'});
 
-		task._state = task.PROCESSING;
+		task._state = Task.PROCESSING;
 
         return task;
 	}
@@ -67,14 +66,6 @@ class Task {
 
 	get state() {return this._state}
 	set state(newState) {this._state = newState}
-
-	get PROCESSING() {return 42}
-	set PROCESSING(id) {this._config.taskStatus.processing = id}
-	get FINALIZING() {return -1;}
-	get FAILED() {return 44}
-	set FAILED(id) {this._config.taskStatus.failed = id}
-	get DONE() {return 43}
-	set DONE(id) {this._config.taskStatus.done = id}
 
 	get sequenceUtils() {
 		return {
@@ -123,7 +114,7 @@ class Task {
 						.on('error', reject);
 				});
 				// Delete downloaded zip
-				fs.unlink('./program_zip.zip', _ =>{});
+				fs.removeSync('./program_zip.zip');
 
 				// Parse env
 				try {
@@ -143,7 +134,6 @@ class Task {
 				if (!this._config.steps[this._config.firstStep])
 					throw new Error(`First step ${this._config.firstStep} doesn't exist`)
 
-
 				// Ensure steps flow validity
 				for (let stepName in this._config.steps) {
 					let step = this._config.steps[stepName];
@@ -158,6 +148,9 @@ class Task {
 
 		} catch (error) {
 			console.log(`\tFAILED\n`);
+			// Clear task program files
+			if (fs.existsSync('./program_zip.zip'))
+				fs.removeSync('./program_zip.zip');
 			throw error;
 		}
 		console.log(`\tSUCCESS\n`);
@@ -189,7 +182,7 @@ class Task {
 			this._step.init(this._env).then(_ => {
 				this._step.execute()
 			})
-			.catch(rejectStep)
+			.catch(rejectStep);
 		})
 		// Step success
 		.then(data => {
@@ -198,8 +191,11 @@ class Task {
 				this._sessionData = {...this._sessionData, ...data};
 
 			// Execute next step
-			if (jsonStep.next)
-				return this._executeStep(jsonStep.next);
+			if (jsonStep.next) {
+				return setTimeout(_ => {
+					return this._executeStep(jsonStep.next);
+				}, 3000);
+			}
 
 			// No next step, finalize task
 			this.finalize();
@@ -238,18 +234,18 @@ class Task {
 	async failed(error) {
 		const duration = this.elapsedTime();
         console.error(`\n**** Process ended - ${duration}ms ****\n\tERROR\n`)
-		this._state = this.FAILED;
+		this._state = Task.FAILED;
 
 		// TODO:
 		// Logout if needed
-		if (this._config.onError)
-			this.window.loadURL(this._config.onError);
+		// if (this._config.onError)
+		// 	this.window.loadURL(this._config.onError);
 
 		if (error) {
 			console.error(error);
 			console.error('\n\n');
 		}
-		await api.call({url: '/api/task/'+this._id, body: {r_state: this.FAILED, f_duration: duration}, method: 'put'});
+		await api.call({url: '/api/task/'+this._id, body: {r_state: Task.FAILED, f_duration: duration}, method: 'put'});
 
 		this._rejectTask();
 	}
@@ -257,9 +253,9 @@ class Task {
 	async finalize() {
 		const duration = this.elapsedTime();
     	console.log(`\n**** Process ended - ${duration}ms ****\n\tSUCCESS\n\n`)
-		this._state = this.DONE;
+		this._state = Task.DONE;
 		// Update Task status
-		await api.call({url: '/api/task/'+this._id, body: {r_state: this.DONE, f_duration: duration}, method: 'put'});
+		await api.call({url: '/api/task/'+this._id, body: {r_state: Task.DONE, f_duration: duration}, method: 'put'});
 
 		this._resolveTask();
 	}
@@ -274,7 +270,7 @@ class Task {
     	if (['dev-tools'].filter(ignore => details.url.includes(ignore)).length > 0)
     		return;
 
-    	console.log(details.method+ '  -  '+details.url)
+    	// console.log("Task.inputUrl() : "+details.method+ '  -  '+details.url)
     	this._step.inputUrl(details);
 	}
 

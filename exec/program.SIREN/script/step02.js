@@ -1,4 +1,4 @@
- var elem = $("label:contains('Activité principale exercée'):eq(0)")
+var elem = $("label:contains('Activité principale exercée'):eq(0)")
 function extractTextNode(element) {
 	return element.parent().contents().filter(function() {
 	  return this.nodeType == Node.TEXT_NODE;
