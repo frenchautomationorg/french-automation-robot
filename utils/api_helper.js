@@ -16,6 +16,7 @@ function getToken() {
 	return new Promise(function(resolve, reject) {
 		request({
 			url: credentials.back_host + '/api/getToken',
+			forever:true,
 			headers: {
 				Authorization: 'Basic ' + new Buffer(credentials.clientKey + ':' + credentials.clientSecret).toString('base64')
 			}
@@ -41,6 +42,8 @@ function call(callOptions, loopCount) {
 		callOptions.url = callOptions.originUrl.indexOf('?') != -1 ?
 						credentials.back_host + callOptions.originUrl + '&token='+BEARER_TOKEN :
 						credentials.back_host + callOptions.originUrl + '?token='+BEARER_TOKEN;
+
+		callOptions.forever = true;
 
 		if (!request[callOptions.method])
 			return reject("Bad method "+callOptions.method+' for API request');
