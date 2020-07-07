@@ -17,7 +17,7 @@
   "author": "GitHub",
   "license": "GPL-3.0",
   "devDependencies": {
-    "electron": "^4.0.4",
+    "electron": "^9.1.0",
     "electron-rebuild": "^1.8.4"
   },
   "dependencies": {
