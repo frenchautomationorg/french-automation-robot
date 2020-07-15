@@ -4,7 +4,7 @@
 
 // Dans le processus de rendu (page web).
 
-      function testConnection() {
-        const { ipcRenderer } = require('electron')
-        console.log(ipcRenderer.sendSync('synchronous-message', 'ping')) // affiche "pong"
-      }
+function testConnection() {
+	const { ipcRenderer } = require('electron')
+	console.log(ipcRenderer.sendSync('synchronous-message', 'ping')) // affiche "pong"
+}

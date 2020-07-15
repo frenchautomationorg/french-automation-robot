@@ -76,7 +76,6 @@ class Robot {
         });
 
 	    this.window.webContents.session.on('will-download', (event, item, webContents) => {
-	    	console.log("WILL DOWNLOAD TRIGGERED");
 	        // Retrieve name of file defined in current step
 	        const filename = this._task.willDownload();
 	        if (!filename)

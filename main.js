@@ -33,7 +33,7 @@ function createWindow () {
     })
 
     // Open the DevTools.
-    // mainWindow.webContents.openDevTools()
+    mainWindow.webContents.openDevTools()
 
     // and load the ./html/index.html of the app.
     mainWindow.loadFile('./html/index.html')
@@ -60,49 +60,9 @@ function createWindow () {
 app.on('ready', function() {
     createWindow();
 
-    const template = [{
-        label: 'Action',
-        submenu: [
-        {
-          label: 'Accueil',
-          click: function() {
-            mainWindow.loadFile('./html/index.html')
-            mainWindow.webContents.executeJavaScript(`document.getElementById("id").innerHTML = "${robot.id}";`);
-          }
-
-        },
-        {
-          label: 'Configurer la connexion',
-          click: function() {
-            mainWindow.loadFile('./html/access.html')
-            mainWindow.webContents.executeJavaScript(`document.getElementById("id").innerHTML = "${robot.id}";`);
-          }
-
-        },
-        {
-          label: 'Lancer les traitements',
-          click: function() {
-            console.log('Lancement');
-            mainWindow.loadFile('./html/index.html');
-            mainWindow.webContents.executeJavaScript(`document.getElementById("launchBtn").click();`);
-          }
-
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: 'Quitter',
-          click: function() {
-            app.quit();
-          }
-        }]
-    }]
-
-    const menu = Menu.buildFromTemplate(template)
-    Menu.setApplicationMenu(menu)
-
-})
+    const template = [];
+    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+});
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
@@ -130,28 +90,71 @@ app.on('certificate-error', function(event, webContents, url, error, certificate
 const { ipcMain } = require('electron')
 
 ipcMain.on('synchronous-message', (event, arg) => {
-
     if (arg == null)
         return;
 
-    if (arg.action == "setConfig") {
-        // Store server config
-        fs.writeFileSync('config/credentials.json', JSON.stringify(arg, null, 4));
-        event.returnValue = 'Configuration réussie !'
+    if (arg.method == 'get') {
+        switch (arg.page) {
+            case 'access':
+                mainWindow.loadFile('./html/access.html');
+                try {
+                    const rawConfig = fs.readFileSync('config/credentials.json');
+                    if (rawConfig && rawConfig !== '') {
+                        const {
+                            id,
+                            back_host,
+                            clientKey,
+                            clientSecret,
+                            idPending,
+                            idProcessing,
+                            idFailed,
+                            idDone,
+                        } = JSON.parse(rawConfig);
 
-        mainWindow.loadFile('./html/index.html')
-        mainWindow.webContents.executeJavaScript(`document.getElementById("id").innerHTML = "${arg.id}";`);
+                        mainWindow.webContents.executeJavaScript(`
+                            document.getElementById('id').value = '${id}';
+                            document.getElementById('f_server').value = '${back_host}';
+                            document.getElementById('f_key').value = '${clientKey}';
+                            document.getElementById('f_secret').value = '${clientSecret}';
+                            document.getElementById('f_processing').value = '${idProcessing}';
+                            document.getElementById('f_done').value = '${idDone}';
+                            document.getElementById('f_pending').value = '${idPending}';
+                            document.getElementById('f_failed').value = '${idFailed}';
+                        `);
+                    }
+                } catch(err) {
+                    ;
+                }
+            break;
 
-        // Reload api credentials
-        api.credentials(true);
+            default:
+                mainWindow.loadFile('./html/index.html');
+                mainWindow.webContents.executeJavaScript(`document.getElementById("id").innerHTML = "${robot.id}";`);
+            break;
+        }
     }
+    else if (arg.method == 'post') {
+        switch (arg.action) {
+            case 'launchBot':
+                console.log("launchBot");
+                mainWindow.loadFile('./html/running.html')
+                mainWindow.webContents.executeJavaScript(`document.getElementById("id").innerHTML = "${robot.id}";`);
 
-    if (arg.action == "launchBot") {
-        console.log("launchBot");
-        mainWindow.loadFile('./html/running.html')
-        mainWindow.webContents.executeJavaScript(`document.getElementById("id").innerHTML = "${robot.id}";`);
+                robot.run();
+            break;
 
-        robot.run();
+            case 'setConfig':
+                // Store server config
+                fs.writeFileSync('config/credentials.json', JSON.stringify(arg, null, 4));
+
+                mainWindow.loadFile('./html/index.html')
+                mainWindow.webContents.executeJavaScript(`document.getElementById("id").innerHTML = "${arg.id}";`);
+
+                // Reload api credentials
+                api.credentials(true);
+                mainWindow.loadFile('./html/index.html')
+            break;
+        }
     }
 
     event.returnValue = 'success'

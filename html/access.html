@@ -73,47 +73,32 @@
 
       <div class="col-xs-10 col-xs-offset-1">
           <div class="form-group">
-              <button class="btn btn-primary btn-lg" onclick="javascript:setConfig();"> Sauvegarder </button>
+              <button id="setConfig" class="btn btn-primary btn-lg"> Sauvegarder </button>
               <button class="btn btn-default btn-lg" onclick="javascript:history.back();"> Annuler </button>
           </div>
       </div>
 
     <div style="text-align: right; color: #fff; margin-top: 170px; padding-right: 15px;">French Automation IT &trade; - Version v1.0.0</div>
     <script>
-    window.jQuery = window.$ = require("../assets/js/jquery.min.js");
+      window.jQuery = window.$ = require("../assets/js/jquery.min.js");
+      const router = require('../assets/js/router.js');
     </script>
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
-    <script>
-      // You can also require other files to run in this process
-      require('../utils/renderer.js')
-    </script>
     <script type="text/javascript">
 
-      function setConfig() {
-        const { ipcRenderer } = require('electron')
-        var id = document.getElementById('id').value
-        var server = document.getElementById('f_server').value
-        var key = document.getElementById('f_key').value
-        var secret = document.getElementById('f_secret').value
-        var processing = document.getElementById('f_processing').value;
-        var done = document.getElementById('f_done').value;
-        var pending = document.getElementById('f_pending').value;
-        var failed = document.getElementById('f_failed').value;
-        var json = {
-          action: "setConfig",
-          id: id,
-          back_host: server,
-          clientKey: key,
-          clientSecret: secret,
-          idPending: pending,
-          idProcessing: processing,
-          idFailed: failed,
-          idDone: done
-        }
-        var message = ipcRenderer.sendSync('synchronous-message', json)
-        alert(message);
-      }
+      $("#setConfig").click(function () {
+        router.send('setConfig', {
+          id: document.getElementById('id').value,
+          back_host: document.getElementById('f_server').value,
+          clientKey: document.getElementById('f_key').value,
+          clientSecret: document.getElementById('f_secret').value,
+          idPending: document.getElementById('f_pending').value,
+          idProcessing: document.getElementById('f_processing').value,
+          idFailed: document.getElementById('f_failed').value,
+          idDone: document.getElementById('f_done').value,
+        });
+      });
 
     </script>
   </body>

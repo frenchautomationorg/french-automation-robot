@@ -98,6 +98,8 @@ class Task {
 			{
 				// Download zip file
 				let result = await api.call({url: '/api/task/'+this._id+'/downloadProgram', encoding: null});
+				if (result.response.statusCode == 404)
+					throw new Error("Task doesn't have a program file");
 				fs.writeFileSync('./program_zip.zip', result.body);
 
 				// Clear previous task program files
@@ -139,7 +141,7 @@ class Task {
 					let step = this._config.steps[stepName];
 					if (step.next && !this._config.steps[step.next])
 						throw new Error(`Step '${step.next}' expected but doesn't exist`);
-					if (!step.endType)
+					if (step.type == 'script' && !step.endType)
 						throw new Error(`Step ${stepName} doesn't have a endType defined`);
 					if (step.endType == 'url' && !step.endWith)
 						throw new Error(`Step ${stepName} as 'url' endType but no endWith provided`);
