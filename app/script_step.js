@@ -88,8 +88,17 @@ class ScriptStep extends Step {
 		// Wait for ending url
 		if (this._endType == 'url') {
 			let endUrlMatched = false;
+
 			while (endUrlMatched == false) {
 				let yieldUrl = yield;
+
+				// Check Browser window
+				if (this._window.webContents.getURL().indexOf(this._endWith.url) == 0 && this._endWith.method.toLowerCase() == yieldUrl.method.toLowerCase()) {
+					console.log("END URL MATCHED");
+					endUrlMatched = true;
+				}
+
+				// Check yield URL context (useful for JS apps)
 				if (yieldUrl.url.indexOf(this._endWith.url) == 0 && this._endWith.method.toLowerCase() == yieldUrl.method.toLowerCase()) {
 					console.log("END URL MATCHED");
 					endUrlMatched = true;
