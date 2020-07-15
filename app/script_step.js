@@ -2,11 +2,12 @@ const Step = require('./step');
 const lineReader = require('readline');
 const fs = require('fs-extra');
 
-const SCRIPT_FINISH_FUNCTION = "\
-	function scriptFinish(object) {\
-		if (object)\
-			return JSON.stringify(object);\
-	}";
+const SCRIPT_FINISH_FUNCTION = `\
+	function scriptFinish(object) {
+		if (object)
+			return JSON.stringify(object);
+	}
+`;
 
 class ScriptStep extends Step {
 	constructor(stepResolve, stepReject, jsonStep, win, isDomReady = false) {

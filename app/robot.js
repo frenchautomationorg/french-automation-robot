@@ -33,6 +33,7 @@ class Robot {
 	get mainWindow() {return this._mainWindow}
 	set mainWindow(mainWin) {this._mainWindow = mainWin}
 
+
 	//
 	// PRIVATE FUNCTIONS
 	//

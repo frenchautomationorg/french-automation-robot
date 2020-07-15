@@ -43,10 +43,10 @@ class Step {
 		console.error(url.url);
 	}
 	async init() {
-		console.error("Error: Step must implement init() function");
+		console.error("Error: Step children must implement init() function");
 	}
 	execute() {
-		console.error("Error: Step must implement execute() function");
+		console.error("Error: Step children must implement execute() function");
 	}
 }
 
