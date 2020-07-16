@@ -130,19 +130,12 @@ class Task {
 
 			// Check config validity
 			{
-				// Ensure first step is defined and exist
-				if (!this._config.firstStep)
-					throw new Error("First step must be defined in config.json");
-				if (!this._config.steps[this._config.firstStep])
-					throw new Error(`First step ${this._config.firstStep} doesn't exist`)
-
 				// Ensure steps flow validity
-				for (let stepName in this._config.steps) {
-					let step = this._config.steps[stepName];
-					if (step.next && !this._config.steps[step.next])
-						throw new Error(`Step '${step.next}' expected but doesn't exist`);
-					if (step.type == 'script' && !step.endType)
-						throw new Error(`Step ${stepName} doesn't have a endType defined`);
+				for (let stepIdx in this._config.steps) {
+					let step = this._config.steps[stepIdx];
+					const stepName = step.name || stepIdx
+					if (!step.endType)
+						throw new Error(`Step ${stepName} doesn't have a endType defined. Values can be 'snippet' || 'url' || 'download'`);
 					if (step.endType == 'url' && !step.endWith)
 						throw new Error(`Step ${stepName} as 'url' endType but no endWith provided`);
 				}
@@ -158,10 +151,10 @@ class Task {
 		console.log(`\tSUCCESS\n`);
 	}
 
-	_executeStep(stepName) {
-		let jsonStep = this._config.steps[stepName];
+	_executeSteps(stepIdx) {
+		let jsonStep = this._config.steps[stepIdx];
 		let stepError = {
-			stepName: stepName,
+			stepIndex: stepIdx,
 			step: jsonStep
 		};
 
@@ -172,7 +165,7 @@ class Task {
 
 		// Create, init and execute step
 		new Promise((resolveStep, rejectStep) => {
-	        console.log(`Executing step ${stepName}:`);
+	        console.log(`Executing step ${jsonStep.name || stepIdx+1}:`);
 	        console.log(JSON.stringify(jsonStep, null, 4));
 
 			// Create step
@@ -181,6 +174,7 @@ class Task {
 			else if (jsonStep.type == 'sequence')
 				this._step = new SequenceStep(resolveStep, rejectStep, jsonStep, this.sequenceUtils);
 
+			// Initialize and execute step
 			this._step.init(this._env).then(_ => {
 				this._step.execute()
 			})
@@ -193,14 +187,13 @@ class Task {
 				this._sessionData = {...this._sessionData, ...data};
 
 			// Execute next step
-			if (jsonStep.next) {
+			if (this._config.steps[stepIdx+1])
 				return setTimeout(_ => {
-					return this._executeStep(jsonStep.next);
+					return this._executeSteps(++stepIdx);
 				}, 3000);
-			}
 
 			// No next step, finalize task
-			this.finalize();
+			return this.finalize();
 		})
 		// Step failed, end Task
 		.catch(error => {
@@ -225,7 +218,7 @@ class Task {
         	// Initialize task
         	this._init().then(_ => {
 	        	// Start first step
-	        	this._executeStep(this._config.firstStep);
+	        	this._executeSteps(0);
         	})
         	.catch(error => {
         		this.failed(error);

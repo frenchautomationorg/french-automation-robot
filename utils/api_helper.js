@@ -43,7 +43,7 @@ function call(callOptions, loopCount) {
 						credentials.back_host + callOptions.originUrl + '&token='+BEARER_TOKEN :
 						credentials.back_host + callOptions.originUrl + '?token='+BEARER_TOKEN;
 
-		callOptions.forever = true;
+		// callOptions.forever = true;
 
 		if (!request[callOptions.method])
 			return reject("Bad method "+callOptions.method+' for API request');

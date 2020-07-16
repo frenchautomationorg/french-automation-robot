@@ -61,7 +61,7 @@ class ScriptStep extends Step {
 	        	super._sessionData = {...super._sessionData, ...scriptData};
 	        }
 
-        	if (this._endType == 'script')
+        	if (this._endType == 'snippet')
         		super.success();
         });
     }
@@ -72,10 +72,8 @@ class ScriptStep extends Step {
 			let startUrlMatched = false;
 			while (startUrlMatched == false) {
 				let yieldUrl = yield;
-				if (this._startWith.url == yieldUrl.url && this._startWith.method.toLowerCase() == yieldUrl.method.toLowerCase()) {
-					console.log("START URL MATCHED");
+				if (this._startWith.url == yieldUrl.url && this._startWith.method.toLowerCase() == yieldUrl.method.toLowerCase())
 					startUrlMatched = true;
-				}
 			}
 		}
 
@@ -93,16 +91,12 @@ class ScriptStep extends Step {
 				let yieldUrl = yield;
 
 				// Check Browser window
-				if (this._window.webContents.getURL().indexOf(this._endWith.url) == 0 && this._endWith.method.toLowerCase() == yieldUrl.method.toLowerCase()) {
-					console.log("END URL MATCHED");
+				if (this._window.webContents.getURL().indexOf(this._endWith.url) == 0 && this._endWith.method.toLowerCase() == yieldUrl.method.toLowerCase())
 					endUrlMatched = true;
-				}
 
 				// Check yield URL context (useful for JS apps)
-				if (yieldUrl.url.indexOf(this._endWith.url) == 0 && this._endWith.method.toLowerCase() == yieldUrl.method.toLowerCase()) {
-					console.log("END URL MATCHED");
+				if (yieldUrl.url.indexOf(this._endWith.url) == 0 && this._endWith.method.toLowerCase() == yieldUrl.method.toLowerCase())
 					endUrlMatched = true;
-				}
 			}
 		}
 
@@ -186,10 +180,6 @@ class ScriptStep extends Step {
 			// Start pending executions
 			if (this._scriptWaiting == true)
 				this._executeScript();
-			// if (this._downloadWaiting == true) {
-			// 	this._downloadWaiting = false;
-			// 	this._window.webContents.downloadURL(this._download.url);
-			// }
 		}
 	}
 }
