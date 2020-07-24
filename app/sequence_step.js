@@ -1,10 +1,9 @@
 const Step = require('./step');
 
 class SequenceStep extends Step {
-	constructor(stepResolve, stepReject, jsonStep, utils) {
-		super(stepResolve, stepReject, jsonStep.timeout);
+	constructor(stepResolve, stepReject, jsonStep, win, utils, isDomReady = true) {
+		super(stepResolve, stepReject, jsonStep, win, isDomReady);
 
-		this._snippet = jsonStep.snippet;
 		this._utils = utils;
 		this._sequence = null;
 	}
@@ -19,13 +18,12 @@ class SequenceStep extends Step {
     	this._sequence = require(requirePath);
     }
 
-    execute() {
+    _executeScript() {
     	this._sequence.execute(this._utils).then(_ => {
-    		super.success();
+            if (!this._endWith)
+    		  this.success();
     	})
-        .catch(error => {
-        	super.error(error);
-        });
+        .catch(this.error);
     }
 }
 

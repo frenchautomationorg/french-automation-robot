@@ -5,6 +5,8 @@ const fs = require('fs-extra');
 const ScriptStep = require('./script_step');
 const SequenceStep = require('./sequence_step');
 
+const robotjs = require('robotjs');
+
 class Task {
 	constructor(task, robot) {
 		this._startTime = process.hrtime();
@@ -69,13 +71,13 @@ class Task {
 
 	get sequenceUtils() {
 		return {
-    		window: this.window,
-    		robotId: this._robotId,
-    		taskId: this._id,
-    		env: this._env,
-    		sessionData: this._sessionData,
-    		api: api,
-    		waitDownloads: _ => {
+    		"window": this.window,
+    		"robotId": this._robotId,
+    		"taskId": this._id,
+    		"env": this._env,
+    		"sessionData": this._sessionData,
+    		"api": api,
+    		"waitDownloads": _ => {
     			return new Promise((downloadsDone, downloadsError) => {
 			    	let waitDownloadPromise = new Promise((resolve, reject) => {
 			        	this.waitForDownloads(resolve, reject);
@@ -97,26 +99,26 @@ class Task {
 			// Load data
 			{
 				// Download zip file
-				let result = await api.call({url: '/api/task/'+this._id+'/downloadProgram', encoding: null});
-				if (result.response.statusCode == 404)
-					throw new Error("Task doesn't have a program file");
-				fs.writeFileSync('./program_zip.zip', result.body);
+				// let result = await api.call({url: '/api/task/'+this._id+'/downloadProgram', encoding: null});
+				// if (result.response.statusCode == 404)
+				// 	throw new Error("Task doesn't have a program file");
+				// fs.writeFileSync('./program_zip.zip', result.body);
 
-				// Clear previous task program files
-				if (fs.existsSync('./exec/program'))
-					fs.removeSync('./exec/program');
+				// // Clear previous task program files
+				// if (fs.existsSync('./exec/program'))
+				// 	fs.removeSync('./exec/program');
 
-				// Unzip program folder
-				await new Promise((resolve, reject) => {
-					fs.createReadStream('./program_zip.zip')
-						.pipe(unzip.Extract({
-							path: './exec/program'
-						}))
-						.on('close', resolve)
-						.on('error', reject);
-				});
-				// Delete downloaded zip
-				fs.removeSync('./program_zip.zip');
+				// // Unzip program folder
+				// await new Promise((resolve, reject) => {
+				// 	fs.createReadStream('./program_zip.zip')
+				// 		.pipe(unzip.Extract({
+				// 			path: './exec/program'
+				// 		}))
+				// 		.on('close', resolve)
+				// 		.on('error', reject);
+				// });
+				// // Delete downloaded zip
+				// fs.removeSync('./program_zip.zip');
 
 				// Parse env
 				try {
@@ -128,18 +130,18 @@ class Task {
 				} catch (error) {throw new Error("Task config.json couldn't be parsed\n"+JSON.stringify(error, null, 4));}
 			}
 
-			// Check config validity
-			{
-				// Ensure steps flow validity
-				for (let stepIdx in this._config.steps) {
-					let step = this._config.steps[stepIdx];
-					const stepName = step.name || stepIdx
-					if (!step.endType)
-						throw new Error(`Step ${stepName} doesn't have a endType defined. Values can be 'snippet' || 'url' || 'download'`);
-					if (step.endType == 'url' && !step.endWith)
-						throw new Error(`Step ${stepName} as 'url' endType but no endWith provided`);
-				}
-			}
+			// // Check config validity
+			// {
+			// 	// Ensure steps flow validity
+			// 	for (let stepIdx in this._config.steps) {
+			// 		let step = this._config.steps[stepIdx];
+			// 		const stepName = step.name || stepIdx
+			// 		if (!step.endType)
+			// 			throw new Error(`Step ${stepName} doesn't have a endType defined. Values can be 'snippet' || 'url' || 'download'`);
+			// 		if (step.endType == 'url' && !step.endWith)
+			// 			throw new Error(`Step ${stepName} as 'url' endType but no endWith provided`);
+			// 	}
+			// }
 
 		} catch (error) {
 			console.log(`\tFAILED\n`);
@@ -158,7 +160,7 @@ class Task {
 			step: jsonStep
 		};
 
-		if (['script', 'sequence'].indexOf(jsonStep.type) == -1) {
+		if (['action', 'sequence'].indexOf(jsonStep.type) == -1) {
 			stepError.error = `Unkown step type ${jsonStep.type}`;
 			return this.failed(stepError);
 		}
@@ -169,10 +171,10 @@ class Task {
 	        console.log(JSON.stringify(jsonStep, null, 4));
 
 			// Create step
-			if (jsonStep.type == 'script')
+			if (jsonStep.type == 'action')
 				this._step = new ScriptStep(resolveStep, rejectStep, jsonStep, this.window, this._domReady);
 			else if (jsonStep.type == 'sequence')
-				this._step = new SequenceStep(resolveStep, rejectStep, jsonStep, this.sequenceUtils);
+				this._step = new SequenceStep(resolveStep, rejectStep, jsonStep, this.window, this.sequenceUtils, this._domReady);
 
 			// Initialize and execute step
 			this._step.init(this._env).then(_ => {

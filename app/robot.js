@@ -43,8 +43,15 @@ class Robot {
 			return;
 
 	    // Window initialization
-	    this.window = new BrowserWindow({ width: 400, height: 200, show: false, webPreferences: { nodeIntegration: false } })
-	    // this.window.openDevTools();
+	    this.window = new BrowserWindow({
+	    	width: 400,
+	    	height: 200,
+	    	alwaysOnTop: true,
+	        closable: true,
+	        minimizable: false,
+	        resizable: false,
+	        webPreferences: { nodeIntegration: false } })
+	    this.window.openDevTools();
 
 	    // When request is complete, notify task so it can continue ongoing task processing
         this.window.webContents.session.webRequest.onCompleted((details, callback) => {
@@ -56,15 +63,26 @@ class Robot {
         		return;
 
         	// Trigger url processing
-        	if (this._task)
+        	if (this._task) {
+        		console.log(`onCompleted: ${details.method} ${details.url} - ${details.statusCode}`);
         		this._task.inputUrl(details);
+        	}
         });
 
+		this.window.webContents.on('new-window', (event, url) => {
+			event.preventDefault();
+
+			console.log("NEW WINDOW");
+			console.log(event);
+			console.log(url);
+			this.window.loadURL(url);
+		});
         // On navigation, notify task that dom is not ready anymore
         this.window.webContents.on('did-navigate', (event, url) => {
         	if (!this._task)
         		return;
         	this._task.domReady(false);
+        	console.log(`did-navigate: ${url}`);
         	this._task.inputUrl({method: 'get', url: url});
         });
 
@@ -103,9 +121,8 @@ class Robot {
 	        this._browserInitialized = false;
 	        this.window = null;
 
-	        if (this._task) {
+	        if (this._task)
 	        	this._task.failed("Window closed during process");
-	        }
 	    });
 
 	    this._browserInitialized = true;
@@ -130,9 +147,6 @@ class Robot {
 	//
 
 	run() {
-		// Init working browser
-		this._initBrowser();
-
 		// Load task if available
 		Task.fetch(this)
 			.then(task => {
@@ -141,6 +155,8 @@ class Robot {
 					return setTimeout(_=> {this.run()}, 5000);
 				}
 
+				// Init working browser
+				this._initBrowser();
 		        this.window.maximize()
 		        this.window.show()
 

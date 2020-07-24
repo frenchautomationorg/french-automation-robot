@@ -29,6 +29,117 @@ npm start</code></pre>
 
 <br/>
 
+
+## Usage
+
+French Automation depends on a newmips application, follow the tutorial to know the prerequisites and how to initialize a configured application : <a href="https://www.frenchautomation.com/default/tutorial" rel="nofollow">https://www.frenchautomation.com/default/tutorial</a>
+<br>
+We're going to see how it works and how to build a program file for your newmips Task.
+
+### Fetch Task
+
+Once the robot is started and running, it will query the API every 5 secondes and check for pending tasks assigned to this robot :
+
+<pre>
+GET '[HOST]/api/task?fk_id_robot_robot=[ROBOT_ID]&fk_id_status_state=[PENDING_ID]&include=r_state&limit=1'
+</pre>
+
+`[HOST]`, `[ROBOT_ID]` and `[PENDING_ID]` are defined using configuration page.
+
+It will download and unzip the task's program files.
+
+### Task configuration
+
+Task's zip file is expected to have a `config.json` file for the Task to run.
+
+JSON configuration must provide a `steps` array containing each steps of this Task. The order of the array will define order of execution.
+
+Steps are objects and require the properties `type`.
+
+<br>
+
+##### Step type 'action'
+
+An `'action'` step is a frontend action. It can open a page, execute javascript, download a file, react to a redirection.
+
+Each of the following step properties are optionnal and will be executed in the following order if found :
+<ul>
+
+<li>startWith</li>
+Providing a startWith object will start the execution of the step by loading the provided url :
+<pre>
+{
+  "url": "https://target-website/login",
+    "method": "GET"
+}
+</pre>
+
+<li>snippet</li>
+A path to a javascript file to execute on the currently loaded page. Root dir is the unzipped Task's program file
+<pre>
+"snippet": "script/fill_and_submit_login_form.js"
+</pre>
+If data needs to be extracted after javascript execution, the script needs to call the function `scriptFinish(dataObject)`. This function is automatically prepended to the file, and should not be overwritten. Data sent to this function will be available to following steps of the Task
+<br><br>
+<li>download</li>
+
+Triggers a download
+<pre>
+{
+  "url": "https://target-website/download",
+  "method": "get",
+  "name": "stepfile.pdf"
+}
+</pre>
+
+<li>endWith</li>
+Providing a endWith object will wait for the provided url to end the ongoing step :
+<pre>
+{
+  "url": "https://target-website/logout",
+  "method": "POST"
+}
+</pre>
+</ul>
+<br>
+
+##### Step type 'sequence'
+
+A `'sequence'` action type is a backend action. Its `snippet` property will be executed as a nodejs module and must export a function `execute(utils)`.
+
+The parameter `utils` sent to `execute(utils)` contains :
+
+<pre>
+{
+  "window": {} // The electron `BrowserWindow` object in use
+  "robotId": int // Running robot ID
+  "taskId": int // Current Task id
+  "env": {} // The Task's `f_data_flow` field, filled through Media Task and parsed to JSON
+  "sessionData": {} // Object filled through script steps
+  "api": { // Functions to use API connection
+      "call": function(options) // Send a request, options should match `requestjs` requirements
+      "upload": function(options) // Same as `call()` but using `options.stream` property to stream a file
+    }
+  "waitDownloads": async function() // Return a promise that resolve when all downloads are done
+}
+</pre>
+<br>
+
+##### Step optional properties
+
+<table>
+  <tbody>
+    <tr>
+      <td>timeout</td>
+      <td>A timeout in milliseconds that will trigger step failure</td>
+    </tr>
+    <tr>
+      <td>name</td>
+      <td>The step name. Only used for config.json and logs readability</td>
+    </tr>
+  </tbody>
+</table>
+
 ## Contribute
 We encourage you to contribute to French Automation software suite.
 <ul>
