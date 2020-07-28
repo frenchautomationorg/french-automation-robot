@@ -64,17 +64,13 @@ class Robot {
 
         	// Trigger url processing
         	if (this._task) {
-        		console.log(`onCompleted: ${details.method} ${details.url} - ${details.statusCode}`);
+        		// console.log(`onCompleted: ${details.method} ${details.url} - ${details.statusCode}`);
         		this._task.inputUrl(details);
         	}
         });
 
 		this.window.webContents.on('new-window', (event, url) => {
 			event.preventDefault();
-
-			console.log("NEW WINDOW");
-			console.log(event);
-			console.log(url);
 			this.window.loadURL(url);
 		});
         // On navigation, notify task that dom is not ready anymore
@@ -82,7 +78,7 @@ class Robot {
         	if (!this._task)
         		return;
         	this._task.domReady(false);
-        	console.log(`did-navigate: ${url}`);
+        	// console.log(`did-navigate: ${url}`);
         	this._task.inputUrl({method: 'get', url: url});
         });
 

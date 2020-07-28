@@ -19,11 +19,20 @@ class SequenceStep extends Step {
     }
 
     _executeScript() {
+        // Dom is not ready, register that sequence should be executed when dom becomes ready
+        if (!this._domReady) {
+            this._scriptWaiting = true;
+            return;
+        }
+        this._scriptWaiting = false;
+
     	this._sequence.execute(this._utils).then(_ => {
             if (!this._endWith)
     		  this.success();
     	})
-        .catch(this.error);
+        .catch(error => {
+            this.error(error)
+        });
     }
 }
 

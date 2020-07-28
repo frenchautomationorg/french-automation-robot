@@ -29,12 +29,18 @@ class ScriptStep extends Step {
         // Execute step script
         this._window.webContents.executeJavaScript(this._script, true).then(scriptData => {
         	if (scriptData) {
-	        	try { scriptData = JSON.parse(scriptData); }
-	        	catch(e) {
-	        		return reject("Couldn't parse webContents.executeJavaScript() scriptData\n"+JSON.stringify(e, null, 4));
-	        	}
-	        	// Merge scriptData with Step sessionData
-	        	this._sessionData = {...this._sessionData, ...scriptData};
+        		if (typeof scriptData === 'string') {
+		        	try {
+		        		scriptData = JSON.parse(scriptData);
+			        	// Merge scriptData with Step sessionData
+			        	this._sessionData = {...this._sessionData, ...scriptData};
+		        	}
+		        	catch(e) {
+		        		console.error("WARN: Couldn't parse webContents.executeJavaScript() scriptData\n"+JSON.stringify(e, null, 4));
+		        	}
+		        }
+		        else
+		        	this._sessionData = {...this._sessionData, ...scriptData};
 	        }
 
         	if (!this._endWith)
@@ -71,12 +77,22 @@ class ScriptStep extends Step {
             }).on('close', _ => {
             	let script = lines.join('\n');
             	// Add default scriptFinish call at end of file if none found
-            	if (script.indexOf("scriptFinish(") == -1)
-            		script = script+"\nscriptFinish();";
+            	// if (script.indexOf("scriptFinish(") == -1)
+            	// 	script = script+"\nscriptFinish();";
 
-            	// Prepend scriptFinish function definition
-            	this._script = SCRIPT_FINISH_FUNCTION+'\n'+script
+            	// // Prepend scriptFinish function definition
+            	// this._script = SCRIPT_FINISH_FUNCTION+'\n'+script
 
+            	if (this._name == "Fetch mails data")
+            		this._script = script;
+            	else {
+	            	// Add default scriptFinish call at end of file if none found
+	            	if (script.indexOf("scriptFinish(") == -1)
+	            		script = script+"\nscriptFinish();";
+
+	            	// Prepend scriptFinish function definition
+	            	this._script = SCRIPT_FINISH_FUNCTION+'\n'+script
+            	}
             	resolve();
             }).on('error', reject);
 		});

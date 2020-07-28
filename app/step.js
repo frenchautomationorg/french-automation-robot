@@ -9,6 +9,7 @@ class Step {
 			jsonStep.startWith.expected = true;
 
 		Object.assign(this, {
+			_name: jsonStep.name,
 			_snippet: jsonStep.snippet,
 			_startWith: jsonStep.startWith,
 			_endWith: jsonStep.endWith,
@@ -22,10 +23,11 @@ class Step {
 		});
 
 
-		this._timeoutValue = jsonStep.timeout || 30000;
-		this._timeout = setTimeout(_ => {
-			this._timedOut()
-		}, this._timeoutValue)
+		this._timeoutValue = jsonStep.timeout !== undefined ? jsonStep.timeout : 30000;
+		if (this._timeoutValue)
+			this._timeout = setTimeout(_ => {
+				this._timedOut()
+			}, this._timeoutValue)
 	}
 
 	//
@@ -76,6 +78,17 @@ class Step {
 	// PUBLIC FUNCTIONS
 	//
 
+	execute() {
+		// Create iterator object from generator function
+		this._urlAction = this._stepActionsIterator();
+		// Move iterator to starting position
+		this._urlAction.next();
+
+		// Trigger execution with starting url if provided
+		if (this._startWith && this._startWith.url)
+			this._window.webContents.loadURL(this._startWith.url);
+	}
+
 	success() {
 		clearTimeout(this._timeout);
 		this._success(this._sessionData);
@@ -95,17 +108,6 @@ class Step {
 		} catch(error) {
 			this.error(error);
 		}
-	}
-
-	execute() {
-		// Create iterator object from generator function
-		this._urlAction = this._stepActionsIterator();
-		// Move iterator to starting position
-		this._urlAction.next();
-
-		// Trigger execution with starting url if provided
-		if (this._startWith && this._startWith.url)
-			this._window.webContents.loadURL(this._startWith.url);
 	}
 
 	downloadState(state) {

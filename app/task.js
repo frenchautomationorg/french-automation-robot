@@ -71,8 +71,8 @@ class Task {
 
 	get sequenceUtils() {
 		return {
-    		"window": this.window,
-    		"robotId": this._robotId,
+    		"window": this._robot.window,
+    		"robotId": this.robotId,
     		"taskId": this._id,
     		"env": this._env,
     		"sessionData": this._sessionData,
@@ -167,20 +167,25 @@ class Task {
 
 		// Create, init and execute step
 		new Promise((resolveStep, rejectStep) => {
-	        console.log(`Executing step ${jsonStep.name || stepIdx+1}:`);
-	        console.log(JSON.stringify(jsonStep, null, 4));
+			const stepDelay = jsonStep.delay || 0;
 
-			// Create step
-			if (jsonStep.type == 'action')
-				this._step = new ScriptStep(resolveStep, rejectStep, jsonStep, this.window, this._domReady);
-			else if (jsonStep.type == 'sequence')
-				this._step = new SequenceStep(resolveStep, rejectStep, jsonStep, this.window, this.sequenceUtils, this._domReady);
+			setTimeout(_ => {
+		        console.log(`Executing step ${jsonStep.name || stepIdx+1}:`);
+		        console.log(JSON.stringify(jsonStep, null, 4));
 
-			// Initialize and execute step
-			this._step.init(this._env).then(_ => {
-				this._step.execute()
-			})
-			.catch(rejectStep);
+				// Create step
+				if (jsonStep.type == 'action')
+					this._step = new ScriptStep(resolveStep, rejectStep, jsonStep, this.window, this._domReady);
+				else if (jsonStep.type == 'sequence')
+					this._step = new SequenceStep(resolveStep, rejectStep, jsonStep, this.window, this.sequenceUtils, this._domReady);
+
+				// Initialize and execute step
+				this._step.init(this._env).then(_ => {
+					this._step.execute()
+				})
+				.catch(rejectStep);
+			}, stepDelay);
+
 		})
 		// Step success
 		.then(data => {
@@ -190,14 +195,12 @@ class Task {
 
 			// Execute next step
 			if (this._config.steps[stepIdx+1])
-				return setTimeout(_ => {
-					return this._executeSteps(++stepIdx);
-				}, 3000);
+				return this._executeSteps(++stepIdx);
 
 			// No next step, finalize task
 			return this.finalize();
 		})
-		// Step failed, end Task
+		// Step failed
 		.catch(error => {
 			stepError.error = error;
 			this.failed(stepError);
