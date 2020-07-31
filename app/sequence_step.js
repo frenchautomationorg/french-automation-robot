@@ -31,7 +31,7 @@ class SequenceStep extends Step {
     		  this.success();
     	})
         .catch(error => {
-            this.error(error)
+            this.error(error);
         });
     }
 }

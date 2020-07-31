@@ -2,13 +2,6 @@ const Step = require('./step');
 const lineReader = require('readline');
 const fs = require('fs-extra');
 
-const SCRIPT_FINISH_FUNCTION = `\
-	function scriptFinish(object) {
-		if (object)
-			return JSON.stringify(object);
-	}
-`;
-
 class ScriptStep extends Step {
 	constructor(stepResolve, stepReject, jsonStep, win, isDomReady = false) {
 		super(stepResolve, stepReject, jsonStep, win, isDomReady);
@@ -55,9 +48,9 @@ class ScriptStep extends Step {
 
 	async init(environmentVars) {
 		await new Promise((resolve, reject) => {
-			// No script file, normalize behavior with scriptFinish function
+			// No script file
 			if (!this._snippet)
-				return resolve(SCRIPT_FINISH_FUNCTION+'\nscriptFinish();');
+				return resolve();
 
             // Read script file
             const instructions = lineReader.createInterface({
@@ -76,23 +69,8 @@ class ScriptStep extends Step {
 	            lines.push(line);
             }).on('close', _ => {
             	let script = lines.join('\n');
-            	// Add default scriptFinish call at end of file if none found
-            	// if (script.indexOf("scriptFinish(") == -1)
-            	// 	script = script+"\nscriptFinish();";
 
-            	// // Prepend scriptFinish function definition
-            	// this._script = SCRIPT_FINISH_FUNCTION+'\n'+script
-
-            	if (this._name == "Fetch mails data")
-            		this._script = script;
-            	else {
-	            	// Add default scriptFinish call at end of file if none found
-	            	if (script.indexOf("scriptFinish(") == -1)
-	            		script = script+"\nscriptFinish();";
-
-	            	// Prepend scriptFinish function definition
-	            	this._script = SCRIPT_FINISH_FUNCTION+'\n'+script
-            	}
+        		this._script = script;
             	resolve();
             }).on('error', reject);
 		});

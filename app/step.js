@@ -124,8 +124,10 @@ class Step {
 		this._domReady = isReady;
 		if (this._domReady == true) {
 			// Start pending executions
-			if (this._scriptWaiting == true)
+			if (this._scriptWaiting == true) {
+				this._scriptWaiting = false;
 				this._executeScript();
+			}
 		}
 	}
 

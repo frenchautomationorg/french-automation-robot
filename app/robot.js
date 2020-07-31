@@ -124,7 +124,7 @@ class Robot {
 	    this._browserInitialized = true;
 	}
 
-	_end() {
+	_end(rerun) {
 		// Manualy delete task to ensure that garbage collector resets any unfinished promise/timeout
 		delete this._task;
 
@@ -133,8 +133,10 @@ class Robot {
 			this.window.destroy()
 			this._browserInitialized = false;
 		}
-		console.log("Fetching new task in 10000ms");
-		setTimeout(_ => { this.run() }, 10000);
+		if (rerun) {
+			console.log("Fetching new task in 5000ms");
+			setTimeout(_ => { this.run() }, 5000);
+		}
 	}
 
 
@@ -158,13 +160,17 @@ class Robot {
 
 				this._task = task;
 				this._task.start()
-					.then(_=> {this._end()})
-					.catch(_=> {this._end()});
+					.then(_=> {this._end(true)})
+					.catch(_=> {this._end(true)});
 			})
 			.catch(error => {
 				console.error("Couldn't fetch task :");
 				console.error(error);
 			});
+	}
+
+	stop() {
+		this._end();
 	}
 }
 

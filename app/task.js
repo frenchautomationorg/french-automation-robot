@@ -99,26 +99,26 @@ class Task {
 			// Load data
 			{
 				// Download zip file
-				// let result = await api.call({url: '/api/task/'+this._id+'/downloadProgram', encoding: null});
-				// if (result.response.statusCode == 404)
-				// 	throw new Error("Task doesn't have a program file");
-				// fs.writeFileSync('./program_zip.zip', result.body);
+				let result = await api.call({url: '/api/task/'+this._id+'/downloadProgram', encoding: null});
+				if (result.response.statusCode == 404)
+					throw new Error("Task doesn't have a program file");
+				fs.writeFileSync('./program_zip.zip', result.body);
 
-				// // Clear previous task program files
-				// if (fs.existsSync('./exec/program'))
-				// 	fs.removeSync('./exec/program');
+				// Clear previous task program files
+				if (fs.existsSync('./exec/program'))
+					fs.removeSync('./exec/program');
 
-				// // Unzip program folder
-				// await new Promise((resolve, reject) => {
-				// 	fs.createReadStream('./program_zip.zip')
-				// 		.pipe(unzip.Extract({
-				// 			path: './exec/program'
-				// 		}))
-				// 		.on('close', resolve)
-				// 		.on('error', reject);
-				// });
-				// // Delete downloaded zip
-				// fs.removeSync('./program_zip.zip');
+				// Unzip program folder
+				await new Promise((resolve, reject) => {
+					fs.createReadStream('./program_zip.zip')
+						.pipe(unzip.Extract({
+							path: './exec/program'
+						}))
+						.on('close', resolve)
+						.on('error', reject);
+				});
+				// Delete downloaded zip
+				fs.removeSync('./program_zip.zip');
 
 				// Parse env
 				try {
@@ -192,6 +192,9 @@ class Task {
 			// If step extracted data, merge with Task sessionData
 			if (data)
 				this._sessionData = {...this._sessionData, ...data};
+
+			if (this._step._endWith)
+				this.domReady(false);
 
 			// Execute next step
 			if (this._config.steps[stepIdx+1])
