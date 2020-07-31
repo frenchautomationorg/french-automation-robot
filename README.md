@@ -75,7 +75,7 @@ Depending on the step's `type` value, it is executed as javascript on the fronte
 "snippet": "script/fill_and_submit_login_form.js"
 </pre>
 
-<br><br>
+<br>
 <li>download</li>
 
 Triggers a download
