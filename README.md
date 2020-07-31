@@ -69,10 +69,12 @@ Providing a startWith object will start the execution of the step by loading the
 
 <li>snippet</li>
 A path to a javascript file to execute on the currently loaded page. Root dir is the unzipped Task's program file
+<br>
+Depending on the step's `type` value, it is executed as javascript on the frontend or nodejs on backend
 <pre>
 "snippet": "script/fill_and_submit_login_form.js"
 </pre>
-If data needs to be extracted after javascript execution, the script needs to call the function `scriptFinish(dataObject)`. This function is automatically prepended to the file, and should not be overwritten. Data sent to this function will be available to following steps of the Task
+
 <br><br>
 <li>download</li>
 
