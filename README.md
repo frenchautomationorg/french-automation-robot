@@ -54,14 +54,7 @@ Task's zip file is expected to have a `config.json` file for the Task to run.
 
 JSON configuration must provide a `steps` array containing each steps of this Task. The order of the array will define order of execution.
 
-Steps are objects and require the properties `type`.
-
 <br>
-
-##### Step type 'action'
-
-An `'action'` step is a frontend action. It can open a page, execute javascript, download a file, react to a redirection.
-
 Each of the following step properties are optionnal and will be executed in the following order if found :
 <ul>
 
@@ -102,10 +95,29 @@ Providing a endWith object will wait for the provided url to end the ongoing ste
 </pre>
 </ul>
 <br>
+Steps require the property `type` to define the type of script it will execute. Two types are possible, 'action' and 'sequence'.
+<br>
+
+##### Step type 'action'
+
+An `'action'` step is a frontend script. It expects a javascript file that will be executed on the currently loaded page.
+<br>
+The script is expected to return a promise. This promise result will be added to the step sessionData object
+<br>
+Example :
+<pre>
+  (_ => {
+    return new Promise((resolve, reject) => {
+      setTimeout(function() {
+        resolve({inputValue: $("#data").text()});
+      })
+    })
+  })().then(results => results);
+</pre>
 
 ##### Step type 'sequence'
 
-A `'sequence'` action type is a backend action. Its `snippet` property will be executed as a nodejs module and must export a function `execute(utils)`.
+A `'sequence'` step is a nodejs script. Its `snippet` property will be executed as a nodejs module and must export a function `execute(utils)`.
 
 The parameter `utils` sent to `execute(utils)` contains :
 
@@ -132,6 +144,10 @@ The parameter `utils` sent to `execute(utils)` contains :
     <tr>
       <td>timeout</td>
       <td>A timeout in milliseconds that will trigger step failure</td>
+    </tr>
+    <tr>
+      <td>delay</td>
+      <td>A delay in milliseconds that will delay step execution</td>
     </tr>
     <tr>
       <td>name</td>

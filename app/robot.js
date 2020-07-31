@@ -51,7 +51,7 @@ class Robot {
 	        minimizable: false,
 	        resizable: false,
 	        webPreferences: { nodeIntegration: false } })
-	    this.window.openDevTools();
+	    // this.window.openDevTools();
 
 	    // When request is complete, notify task so it can continue ongoing task processing
         this.window.webContents.session.webRequest.onCompleted((details, callback) => {
