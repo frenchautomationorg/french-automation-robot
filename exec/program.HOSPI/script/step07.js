@@ -1,1 +1,0 @@
-setTimeout( function() { location.href="https://pav1.services-fm.net/ExtranetPremiumApporteur/logout"; }, 15000);

@@ -1,1 +1,0 @@
-setTimeout( function() { location.href="https://pav1.services-fm.net/ExtranetPremiumProspect/download?action=devis";  }, 3000);
