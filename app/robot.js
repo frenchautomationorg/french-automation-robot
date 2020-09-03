@@ -44,14 +44,14 @@ class Robot {
 
 	    // Window initialization
 	    this.window = new BrowserWindow({
-	    	width: 400,
-	    	height: 200,
+	    	width: 800,
+	    	height: 600,
 	    	alwaysOnTop: true,
 	        closable: true,
 	        minimizable: false,
 	        resizable: false,
 	        webPreferences: { nodeIntegration: false } })
-	    // this.window.openDevTools();
+	    this.window.openDevTools();
 
 	    // When request is complete, notify task so it can continue ongoing task processing
         this.window.webContents.session.webRequest.onCompleted((details, callback) => {
@@ -63,10 +63,8 @@ class Robot {
         		return;
 
         	// Trigger url processing
-        	if (this._task) {
-        		// console.log(`onCompleted: ${details.method} ${details.url} - ${details.statusCode}`);
+        	if (this._task)
         		this._task.inputUrl(details);
-        	}
         });
 
 		this.window.webContents.on('new-window', (event, url) => {
@@ -78,7 +76,6 @@ class Robot {
         	if (!this._task)
         		return;
         	this._task.domReady(false);
-        	// console.log(`did-navigate: ${url}`);
         	this._task.inputUrl({method: 'get', url: url});
         });
 
@@ -121,6 +118,8 @@ class Robot {
 	        	this._task.failed("Window closed during process");
 	    });
 
+        this.window.maximize();
+        this.window.show();
 	    this._browserInitialized = true;
 	}
 
@@ -155,8 +154,6 @@ class Robot {
 
 				// Init working browser
 				this._initBrowser();
-		        this.window.maximize()
-		        this.window.show()
 
 				this._task = task;
 				this._task.start()

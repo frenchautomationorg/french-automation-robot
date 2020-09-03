@@ -12,7 +12,6 @@ var MAX_TOKEN_TRY = 20
 var credentials;
 
 function getToken() {
-
 	return new Promise(function(resolve, reject) {
 		request({
 			url: credentials.back_host + '/api/getToken',

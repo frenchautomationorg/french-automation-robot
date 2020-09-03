@@ -98,27 +98,27 @@ class Task {
 		try {
 			// Load data
 			{
-				// Download zip file
-				let result = await api.call({url: '/api/task/'+this._id+'/downloadProgram', encoding: null});
-				if (result.response.statusCode == 404)
-					throw new Error("Task doesn't have a program file");
-				fs.writeFileSync('./program_zip.zip', result.body);
+				// // Download zip file
+				// let result = await api.call({url: '/api/task/'+this._id+'/downloadProgram', encoding: null});
+				// if (result.response.statusCode == 404)
+				// 	throw new Error("Task doesn't have a program file");
+				// fs.writeFileSync('./program_zip.zip', result.body);
 
-				// Clear previous task program files
-				if (fs.existsSync('./exec/program'))
-					fs.removeSync('./exec/program');
+				// // Clear previous task program files
+				// if (fs.existsSync('./exec/program'))
+				// 	fs.removeSync('./exec/program');
 
-				// Unzip program folder
-				await new Promise((resolve, reject) => {
-					fs.createReadStream('./program_zip.zip')
-						.pipe(unzip.Extract({
-							path: './exec/program'
-						}))
-						.on('close', resolve)
-						.on('error', reject);
-				});
-				// Delete downloaded zip
-				fs.removeSync('./program_zip.zip');
+				// // Unzip program folder
+				// await new Promise((resolve, reject) => {
+				// 	fs.createReadStream('./program_zip.zip')
+				// 		.pipe(unzip.Extract({
+				// 			path: './exec/program'
+				// 		}))
+				// 		.on('close', resolve)
+				// 		.on('error', reject);
+				// });
+				// // Delete downloaded zip
+				// fs.removeSync('./program_zip.zip');
 
 				// Parse env
 				try {
@@ -129,19 +129,6 @@ class Task {
 					this._config = JSON.parse(fs.readFileSync(`${__dirname}/../exec/program/config.json`))
 				} catch (error) {throw new Error("Task config.json couldn't be parsed\n"+JSON.stringify(error, null, 4));}
 			}
-
-			// // Check config validity
-			// {
-			// 	// Ensure steps flow validity
-			// 	for (let stepIdx in this._config.steps) {
-			// 		let step = this._config.steps[stepIdx];
-			// 		const stepName = step.name || stepIdx
-			// 		if (!step.endType)
-			// 			throw new Error(`Step ${stepName} doesn't have a endType defined. Values can be 'snippet' || 'url' || 'download'`);
-			// 		if (step.endType == 'url' && !step.endWith)
-			// 			throw new Error(`Step ${stepName} as 'url' endType but no endWith provided`);
-			// 	}
-			// }
 
 		} catch (error) {
 			console.log(`\tFAILED\n`);
@@ -250,7 +237,7 @@ class Task {
 		}
 		await api.call({url: '/api/task/'+this._id, body: {r_state: Task.FAILED, f_duration: duration}, method: 'put'});
 
-		this._rejectTask();
+		// this._rejectTask();
 	}
 
 	async finalize() {

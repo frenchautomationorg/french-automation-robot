@@ -11,4 +11,4 @@ vision*
 download/*
 credentials.json
 *node_modules*
-exec/program
+exec/

@@ -58,7 +58,6 @@ class Step {
 		// Wait for ending url
 		if (this._endWith && this._endWith.url) {
 			let endUrlMatched = false;
-
 			while (endUrlMatched == false) {
 				let yieldUrl = yield;
 				// Check Browser window
