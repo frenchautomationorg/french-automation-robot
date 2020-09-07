@@ -48,10 +48,33 @@ GET '[HOST]/api/task?fk_id_robot_robot=[ROBOT_ID]&fk_id_status_state=[PENDING_ID
 
 It will download and unzip the task's program files.
 
+
 ### Task configuration
 
 Task's zip file is expected to have a `config.json` file for the Task to run.
 
+<pre>
+{
+  "steps": [
+      ....
+    ],
+    "onError": ...
+}
+</pre>
+
+`config.json` must be placed at zip's root directory
+
+<pre>
+program.zip/
+ - config.json
+ - sessionScripts/
+   - login.js
+   - logout.js
+ - fetchData.js
+</pre>
+
+
+#### steps
 JSON configuration must provide a `steps` array containing each steps of this Task. The order of the array will define order of execution.
 
 <br>
@@ -157,6 +180,17 @@ The parameter `utils` sent to `execute(utils)` contains :
     </tr>
   </tbody>
 </table>
+
+#### onError
+
+`config.json` can provide `onError` property that will be executed if the task encounter an error. It can be useful to reset changes, logout or whatever is needed before finishing the task.
+
+`onError` can be defined in 3 ways :
+
+<ul>
+<li>An index of a step from the steps array</li>
+<li>A step object</li>
+<li>An array of step objects</li>
 
 ## Contribute
 We encourage you to contribute to French Automation software suite.

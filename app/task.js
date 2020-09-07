@@ -140,61 +140,67 @@ class Task {
 		console.log(`\tSUCCESS\n`);
 	}
 
-	_executeSteps(stepIdx) {
-		let jsonStep = this._config.steps[stepIdx];
-		let stepError = {
-			stepIndex: stepIdx,
-			step: jsonStep
-		};
+	async _executeSteps(steps, isErrorStep = false) {
+		const finalize = !isErrorStep ? _ => {this.finalize()} : _ => {};
+		const failed = !isErrorStep ? error => {this.failed(error)} : error => { console.error("onError step failed"); console.error(error); };
 
-		if (['action', 'sequence'].indexOf(jsonStep.type) == -1) {
-			stepError.error = `Unkown step type ${jsonStep.type}`;
-			return this.failed(stepError);
+		if (!steps || steps.length == 0 || steps.filter(step => !!step).length != steps.length) {
+			if (isErrorStep)
+				console.error("Invalid onError definition");
+			return finalize();
 		}
 
-		// Create, init and execute step
-		new Promise((resolveStep, rejectStep) => {
-			const stepDelay = jsonStep.delay || 0;
+		for (const [stepIdx, jsonStep] of steps.entries()) {
+			let stepError = {
+				stepIndex: stepIdx,
+				step: jsonStep
+			};
 
-			setTimeout(_ => {
-		        console.log(`Executing step ${jsonStep.name || stepIdx+1}:`);
-		        console.log(JSON.stringify(jsonStep, null, 4));
+			if (['action', 'sequence'].indexOf(jsonStep.type) == -1) {
+				stepError.error = `Unkown step type ${jsonStep.type}`;
+				return failed(stepError);
+			}
 
-				// Create step
-				if (jsonStep.type == 'action')
-					this._step = new ScriptStep(resolveStep, rejectStep, jsonStep, this.window, this._domReady);
-				else if (jsonStep.type == 'sequence')
-					this._step = new SequenceStep(resolveStep, rejectStep, jsonStep, this.window, this.sequenceUtils, this._domReady);
+			// Create, init and execute step
+			const stepPromise = new Promise((resolveStep, rejectStep) => {
+				const stepDelay = jsonStep.delay || 0;
 
-				// Initialize and execute step
-				this._step.init(this._env).then(_ => {
-					this._step.execute()
-				})
-				.catch(rejectStep);
-			}, stepDelay);
+				setTimeout(_ => {
+			        console.log(`Executing ${isErrorStep ? "onError step" : "step"} ${jsonStep.name || stepIdx+1}:`);
+			        console.log(JSON.stringify(jsonStep, null, 4));
 
-		})
-		// Step success
-		.then(data => {
-			// If step extracted data, merge with Task sessionData
-			if (data)
-				this._sessionData = {...this._sessionData, ...data};
+					// Create step
+					if (jsonStep.type == 'action')
+						this._step = new ScriptStep(resolveStep, rejectStep, jsonStep, this.window, this._domReady);
+					else if (jsonStep.type == 'sequence')
+						this._step = new SequenceStep(resolveStep, rejectStep, jsonStep, this.window, this.sequenceUtils, this._domReady);
 
-			if (this._step._endWith)
-				this.domReady(false);
+					// Initialize and execute step
+					this._step.init(this._env).then(_ => {
+						this._step.execute()
+					})
+					.catch(rejectStep);
+				}, stepDelay);
+			});
 
-			// Execute next step
-			if (this._config.steps[stepIdx+1])
-				return this._executeSteps(++stepIdx);
+			try {
+				// await step execution
+				const data = await stepPromise;
 
-			// No next step, finalize task
-			return this.finalize();
-		})
-		// Step failed
-		.catch(error => {
-			stepError.error = error;
-			this.failed(stepError);
-		})
+				// If step extracted data, merge with Task sessionData
+				if (data)
+					this._sessionData = {...this._sessionData, ...data};
+
+				// If step ended with an URL, set dom not ready. It will be set back to ready through electron 'dom-ready' event
+				if (this._step._endWith)
+					this.domReady(false);
+			} catch (error) {
+				stepError.error = error;
+				return failed(stepError);
+			}
+		}
+
+		finalize();
 	}
 
 
@@ -213,7 +219,7 @@ class Task {
         	// Initialize task
         	this._init().then(_ => {
 	        	// Start first step
-	        	this._executeSteps(0);
+	        	this._executeSteps(this._config.steps);
         	})
         	.catch(error => {
         		this.failed(error);
@@ -222,20 +228,26 @@ class Task {
 	}
 
 	async failed(error) {
+		// Execute error steps if defined
+		if (this._config.onError) {
+			console.log("\n**** Task failed - Starting onError process ****\n");
+			const errorSteps = typeof this._config.onError === 'array'
+					? this._config.onError
+					: typeof this._config.onError === 'object'
+						? [this._config.onError]
+						: [this._config.steps[this._config.onError]];
+			await this._executeSteps(errorSteps, true);
+		}
+
 		const duration = this.elapsedTime();
-        console.error(`\n**** Process ended - ${duration}ms ****\n\tERROR\n`)
 		this._state = Task.FAILED;
+		await api.call({url: '/api/task/'+this._id, body: {r_state: Task.FAILED, f_duration: duration}, method: 'put'});
 
-		// TODO:
-		// Logout if needed
-		// if (this._config.onError)
-		// 	this.window.loadURL(this._config.onError);
-
+        console.error(`\n**** Process ended - ${duration}ms ****\n\tERROR\n`)
 		if (error) {
 			console.error(error);
 			console.error('\n\n');
 		}
-		await api.call({url: '/api/task/'+this._id, body: {r_state: Task.FAILED, f_duration: duration}, method: 'put'});
 
 		this._rejectTask();
 	}
