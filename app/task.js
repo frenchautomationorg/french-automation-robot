@@ -1,6 +1,7 @@
 const api = require('../utils/api_helper');
 const unzip = require('unzip-stream');
 const fs = require('fs-extra');
+const moment = require('moment');
 
 const ScriptStep = require('./script_step');
 const SequenceStep = require('./sequence_step');
@@ -247,6 +248,22 @@ class Task {
 		if (error) {
 			console.error(error);
 			console.error('\n\n');
+
+			try {
+				const fileName = `error-file-${moment().format('DD-MM-YYYY')}.json`;
+				const filePath = `${__dirname}/../${fileName}`;
+				fs.writeFileSync(filePath, JSON.stringify(error, null, 4), 'utf8');
+				await api.upload({
+					url: '/api/task/'+this._id+'/error_file',
+					method: 'post',
+					stream: fs.createReadStream(filePath)
+				})
+				fs.unlinkSync(filePath);
+			} catch(err) {
+				console.error("Couldn't send error file");
+				console.error(err);
+			}
+
 		}
 
 		this._rejectTask();
