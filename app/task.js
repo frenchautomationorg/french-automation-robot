@@ -123,7 +123,11 @@ class Task {
 
 				// Parse env
 				try {
-					this._env = JSON.parse(this._env);
+					console.log(this._env);
+					if (this._env && this._env != '')
+						this._env = JSON.parse(this._env);
+					else
+						this._env = {};
 				} catch (error) {throw new Error("Task f_data_flow couldn't be parsed\n"+JSON.stringify(error, null, 4));}
 				// Parse steps
 				try {
@@ -223,7 +227,8 @@ class Task {
 	        	this._executeSteps(this._config.steps);
         	})
         	.catch(error => {
-        		this.failed(error);
+        		console.error(error);
+        		this._rejectTask(error);
         	});
         });
 	}
@@ -252,7 +257,19 @@ class Task {
 			try {
 				const fileName = `error-file-${moment().format('DD-MM-YYYY')}.json`;
 				const filePath = `${__dirname}/../${fileName}`;
-				fs.writeFileSync(filePath, JSON.stringify(error, null, 4), 'utf8');
+
+				// Replacer parameter for JSON.stringify. It prints correctly error stacktrace
+				function replaceErrors(key, value) {
+				    if (value instanceof Error) {
+				        var error = {};
+				        Object.getOwnPropertyNames(value).forEach(function (key) {
+				            error[key] = value[key];
+				        });
+				        return error;
+				    }
+				    return value;
+				}
+				fs.writeFileSync(filePath, JSON.stringify(error, replaceErrors, 4), 'utf8');
 				await api.upload({
 					url: '/api/task/'+this._id+'/error_file',
 					method: 'post',
