@@ -44,12 +44,12 @@ class Robot {
 
 	    // Window initialization
 	    this.window = new BrowserWindow({
-	    	width: 800,
-	    	height: 600,
+	    	width: 1000,
+	    	height: 1000,
 	    	alwaysOnTop: true,
 	        closable: true,
 	        minimizable: false,
-	        resizable: false,
+	        resizable: true,
 	        webPreferences: { nodeIntegration: false } })
 	    // this.window.openDevTools();
 
