@@ -49,7 +49,7 @@ class Task {
         let task = new Task(result.body.tasks[0], robot);
 
         // Indicate to orchestrator that task is now in process
-		await api.call({url: '/api/task/' + task.id, body: {r_state: Task.PROCESSING}, method: 'put'});
+		await api.call({url: '/api/task/' + task.id, body: {r_state: Task.PROCESSING, f_execution_start_date: new Date()}, method: 'put'});
 
 		task._state = Task.PROCESSING;
 
@@ -247,7 +247,7 @@ class Task {
 
 		const duration = this.elapsedTime();
 		this._state = Task.FAILED;
-		await api.call({url: '/api/task/'+this._id, body: {r_state: Task.FAILED, f_duration: duration}, method: 'put'});
+		await api.call({url: '/api/task/'+this._id, body: {r_state: Task.FAILED, f_execution_finish_date: new Date(), f_duration: duration}, method: 'put'});
 
         console.error(`\n**** Process ended - ${duration}ms ****\n\tERROR\n`)
 		if (error) {
@@ -291,7 +291,7 @@ class Task {
     	console.log(`\n**** Process ended - ${duration}ms ****\n\tSUCCESS\n\n`)
 		this._state = Task.DONE;
 		// Update Task status
-		await api.call({url: '/api/task/'+this._id, body: {r_state: Task.DONE, f_duration: duration}, method: 'put'});
+		await api.call({url: '/api/task/'+this._id, body: {r_state: Task.DONE, f_execution_finish_date: new Date(), f_duration: duration}, method: 'put'});
 
 		this._resolveTask();
 	}

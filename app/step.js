@@ -84,7 +84,7 @@ class Step {
 		this._urlAction.next();
 
 		// Trigger execution with starting url if provided
-		if (this._startWith && this._startWith.url)
+		if (this._startWith && this._startWith.url && this._window)
 			this._window.webContents.loadURL(this._startWith.url);
 	}
 
