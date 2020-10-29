@@ -123,7 +123,6 @@ class Task {
 
 				// Parse env
 				try {
-					console.log(this._env);
 					if (this._env && this._env != '')
 						this._env = JSON.parse(this._env);
 					else
@@ -147,7 +146,7 @@ class Task {
 
 	async _executeSteps(steps, isErrorStep = false) {
 		const finalize = !isErrorStep ? _ => {this.finalize()} : _ => {};
-		const failed = !isErrorStep ? error => {this.failed(error)} : error => { console.error("onError step failed"); console.error(error); };
+		const failed = !isErrorStep ? error => { this.failed(error)} : error => {console.error("onError step failed"); console.error(error); };
 
 		if (!steps || steps.length == 0 || steps.filter(step => !!step).length != steps.length) {
 			if (isErrorStep)
@@ -235,7 +234,7 @@ class Task {
 
 	async failed(error) {
 		// Execute error steps if defined
-		if (this._config.onError) {
+		if (this._config.onError !== undefined) {
 			console.log("\n**** Task failed - Starting onError process ****\n");
 			const errorSteps = typeof this._config.onError === 'array'
 					? this._config.onError
@@ -258,7 +257,7 @@ class Task {
 				const fileName = `error-file-${moment().format('DD-MM-YYYY')}.json`;
 				const filePath = `${__dirname}/../${fileName}`;
 
-				// Replacer parameter for JSON.stringify. It prints correctly error stacktrace
+				// Replacer parameter for JSON.stringify. It correctly prints error stacktrace
 				function replaceErrors(key, value) {
 				    if (value instanceof Error) {
 				        var error = {};
@@ -274,7 +273,7 @@ class Task {
 					url: '/api/task/'+this._id+'/error_file',
 					method: 'post',
 					stream: fs.createReadStream(filePath)
-				})
+				});
 				fs.unlinkSync(filePath);
 			} catch(err) {
 				console.error("Couldn't send error file");

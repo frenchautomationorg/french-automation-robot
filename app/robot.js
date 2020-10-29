@@ -157,12 +157,14 @@ class Robot {
 
 				this._task = task;
 				this._task.start()
-					.then(_=> {this._end(true)})
-					.catch(_=> {this._end(true)});
+					.then(_=> { this._end(true) })
+					.catch(_=> { this._end(true) });
 			})
 			.catch(error => {
 				console.error("Couldn't fetch task :");
 				console.error(error);
+				console.error("Retrying in 30000ms");
+				setTimeout(_ => { this.run() }, 30000);
 			});
 	}
 

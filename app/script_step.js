@@ -51,10 +51,14 @@ class ScriptStep extends Step {
 			// No script file
 			if (!this._snippet)
 				return resolve();
+			const snippetFile = `${__dirname}/../exec/program/${this._snippet}`;
+
+			if (!fs.existsSync(snippetFile))
+				return reject(`Couldn't find snippet file ${snippetFile}`);
 
             // Read script file
             const instructions = lineReader.createInterface({
-                input: fs.createReadStream(`${__dirname}/../exec/program/${this._snippet}`)
+                input: fs.createReadStream(snippetFile)
             });
             const lines = [];
             // Replace environment variables
