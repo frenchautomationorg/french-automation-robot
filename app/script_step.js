@@ -38,6 +38,8 @@ class ScriptStep extends Step {
 
         	if (!this._endWith)
         		this.success();
+        }).catch(error => {
+        	this.error(error);
         });
     }
 

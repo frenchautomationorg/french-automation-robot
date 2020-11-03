@@ -127,6 +127,8 @@ class Task {
 						this._env = JSON.parse(this._env);
 					else
 						this._env = {};
+					console.log("ENV => ");
+					console.log(this._env);
 				} catch (error) {throw new Error("Task f_data_flow couldn't be parsed\n"+JSON.stringify(error, null, 4));}
 				// Parse steps
 				try {
@@ -288,6 +290,9 @@ class Task {
 	async finalize() {
 		const duration = this.elapsedTime();
     	console.log(`\n**** Process ended - ${duration}ms ****\n\tSUCCESS\n\n`)
+
+    	if (Object.keys(this._sessionData).length)
+    		console.log(JSON.stringify(this._sessionData, null, 4));
 		this._state = Task.DONE;
 		// Update Task status
 		await api.call({url: '/api/task/'+this._id, body: {r_state: Task.DONE, f_execution_finish_date: new Date(), f_duration: duration}, method: 'put'});

@@ -51,7 +51,7 @@ class Robot {
 	        minimizable: false,
 	        resizable: true,
 	        webPreferences: { nodeIntegration: false } })
-	    // this.window.openDevTools();
+	    this.window.openDevTools();
 
 	    // When request is complete, notify task so it can continue ongoing task processing
         this.window.webContents.session.webRequest.onCompleted((details, callback) => {
@@ -59,7 +59,7 @@ class Robot {
         		return;
 
         	// App level url filtering
-        	if (details.url.match(/file:\/\//) != null)
+        	if (details.url.match(/file:\/\//) != null || details.url.includes('devtools://'))
         		return;
 
         	// Trigger url processing
@@ -75,6 +75,7 @@ class Robot {
         this.window.webContents.on('did-navigate', (event, url) => {
         	if (!this._task)
         		return;
+
         	this._task.domReady(false);
         	this._task.inputUrl({method: 'get', url: url});
         });

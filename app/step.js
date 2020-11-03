@@ -6,7 +6,7 @@ class Step {
 		this._sessionData = {};
 
 		if (jsonStep.startWith && typeof jsonStep.startWith.expected === 'undefined')
-			jsonStep.startWith.expected = true;
+			jsonStep.startWith.expected = false;
 
 		Object.assign(this, {
 			_name: jsonStep.name,
