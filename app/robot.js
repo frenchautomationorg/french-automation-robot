@@ -144,29 +144,33 @@ class Robot {
 	// PUBLIC FUNCTIONS
 	//
 
-	run() {
+	async run() {
 		// Load task if available
-		Task.fetch(this)
-			.then(task => {
-				if (!task) {
-	            	console.log("No task found - Retry in 5000ms");
-					return setTimeout(_=> {this.run()}, 5000);
-				}
+		try {
+			const task = await Task.fetch(this);
+			if (!task) {
+	        	console.log("No task found - Retry in 5000ms");
+				return setTimeout(_=> {this.run()}, 5000);
+			}
 
-				// Init working browser
-				this._initBrowser();
+			// Init working browser
+			this._initBrowser();
 
-				this._task = task;
-				this._task.start()
-					.then(_=> { this._end(true) })
-					.catch(_=> { this._end(true) });
-			})
-			.catch(error => {
-				console.error("Couldn't fetch task :");
-				console.error(error);
-				console.error("Retrying in 30000ms");
-				setTimeout(_ => { this.run() }, 30000);
-			});
+			// Start task execution
+			this._task = task;
+			await this._task.start();
+			// Send log file to API
+			await this._task.sendLogFile();
+
+			this._end(true);
+
+		} catch(error) {
+			console.error("Couldn't fetch task :");
+			console.error(error);
+			console.error("Retrying in 30000ms");
+			setTimeout(_ => { this.run() }, 30000);
+		}
+
 	}
 
 	stop() {

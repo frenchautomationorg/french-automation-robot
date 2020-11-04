@@ -20,6 +20,9 @@ class Task {
 		this._sessionData = {};
 		this._loggedOut = false;
 		this._domReady = false;
+
+		this._logFolder = `${__dirname}/../logs/${moment().format('DDMMYYYY')}`;
+		this._logFilePath = `${this._logFolder}/${new Date().getTime()}_task_${task.id}_log.txt`;
 	}
 
 
@@ -62,13 +65,11 @@ class Task {
 	//
 
 	get id() {return this._id}
-
 	get robotId() {return this._robot.id}
-
 	get window() {return this._robot.window}
-
 	get state() {return this._state}
 	set state(newState) {this._state = newState}
+	get logFilePath() {return this._logFilePath}
 
 	get sequenceUtils() {
 		return {
@@ -93,42 +94,66 @@ class Task {
 	// PRIVATE FUNCTIONS
 	//
 
+	log(param) {
+		try {
+			if (!this._writeStream) {
+				fs.ensureDirSync(this._logFolder);
+				this._writeStream = fs.createWriteStream(this._logFilePath, {flags: 'a', encoding: 'utf8'});
+			}
+
+			// Replacer parameter for JSON.stringify. It correctly prints error stacktrace
+			function replaceErrors(key, value) {
+			    if (value instanceof Error) {
+			        var error = {};
+			        Object.getOwnPropertyNames(value).forEach(function (key) {
+			            error[key] = value[key];
+			        });
+			        return error;
+			    }
+			    return value;
+			}
+
+			const toWrite = (typeof param === 'object' || typeof param === 'array' ? JSON.stringify(param, replaceErrors, 4) : param) + '\n';
+			this._writeStream.write(toWrite);
+			console.log(param);
+		} catch(err) {
+			console.error("Couldn't log to file");
+			console.error(err);
+			console.log(param);
+		}
+	}
+
 	async _init() {
-		console.log(`\n**** Initialization ****\n`);
+		this.log(`\n**** Initialization ****\n`);
 
 		try {
 			// Load data
 			{
 				// Download zip file
-				let result = await api.call({url: '/api/task/'+this._id+'/downloadProgram', encoding: null});
-				if (result.response.statusCode == 404)
-					throw new Error("Task doesn't have a program file");
-				fs.writeFileSync('./program_zip.zip', result.body);
+				// let result = await api.call({url: '/api/task/'+this._id+'/downloadProgram', encoding: null});
+				// if (result.response.statusCode == 404)
+				// 	throw new Error("Task doesn't have a program file");
+				// fs.writeFileSync('./program_zip.zip', result.body);
 
-				// Clear previous task program files
-				if (fs.existsSync('./exec/program'))
-					fs.removeSync('./exec/program');
+				// // Clear previous task program files
+				// if (fs.existsSync('./exec/program'))
+				// 	fs.removeSync('./exec/program');
 
-				// Unzip program folder
-				await new Promise((resolve, reject) => {
-					fs.createReadStream('./program_zip.zip')
-						.pipe(unzip.Extract({
-							path: './exec/program'
-						}))
-						.on('close', resolve)
-						.on('error', reject);
-				});
-				// Delete downloaded zip
-				fs.removeSync('./program_zip.zip');
+				// // Unzip program folder
+				// await new Promise((resolve, reject) => {
+				// 	fs.createReadStream('./program_zip.zip')
+				// 		.pipe(unzip.Extract({
+				// 			path: './exec/program'
+				// 		}))
+				// 		.on('close', resolve)
+				// 		.on('error', reject);
+				// });
+				// // Delete downloaded zip
+				// fs.removeSync('./program_zip.zip');
 
 				// Parse env
 				try {
-					if (this._env && this._env != '')
-						this._env = JSON.parse(this._env);
-					else
-						this._env = {};
-					console.log("ENV => ");
-					console.log(this._env);
+					this._env = this._env && this._env != '' ? JSON.parse(this._env) : {};
 				} catch (error) {throw new Error("Task f_data_flow couldn't be parsed\n"+JSON.stringify(error, null, 4));}
 				// Parse steps
 				try {
@@ -137,22 +162,22 @@ class Task {
 			}
 
 		} catch (error) {
-			console.log(`\tFAILED\n`);
+			this.log(`\tFAILED\n`);
 			// Clear task program files
 			if (fs.existsSync('./program_zip.zip'))
 				fs.removeSync('./program_zip.zip');
 			throw error;
 		}
-		console.log(`\tSUCCESS\n`);
+		this.log(`\tSUCCESS\n`);
 	}
 
 	async _executeSteps(steps, isErrorStep = false) {
 		const finalize = !isErrorStep ? _ => {this.finalize()} : _ => {};
-		const failed = !isErrorStep ? error => { this.failed(error)} : error => {console.error("onError step failed"); console.error(error); };
+		const failed = !isErrorStep ? error => { this.failed(error)} : error => {this.log("onError step failed"); this.log(error); };
 
 		if (!steps || steps.length == 0 || steps.filter(step => !!step).length != steps.length) {
 			if (isErrorStep)
-				console.error("Invalid onError definition");
+				this.log("Invalid onError definition");
 			return finalize();
 		}
 
@@ -172,8 +197,8 @@ class Task {
 				const stepDelay = jsonStep.delay || 0;
 
 				setTimeout(_ => {
-			        console.log(`Executing ${isErrorStep ? "onError step" : "step"} ${jsonStep.name || stepIdx+1}:`);
-			        console.log(JSON.stringify(jsonStep, null, 4));
+			        this.log(`Executing ${isErrorStep ? "onError step" : "step"} ${jsonStep.name || stepIdx+1}:`);
+			        this.log(JSON.stringify(jsonStep, null, 4));
 
 					// Create step
 					if (jsonStep.type == 'action')
@@ -215,12 +240,11 @@ class Task {
 	//
 
 	async start() {
-        console.log(`\n*********************************\n**** Task #` + this.id + ` process STARTED ****\n*********************************`);
+        this.log(`\n*********************************\n**** Task #` + this.id + ` process STARTED ****\n*********************************`);
 
-        await new Promise((resolve, reject) => {
-        	// Set main resolve/reject to task to be able to finish process anytime
+        await new Promise((resolve) => {
+        	// Set main resolve to task to be able to finish process anytime
         	this._resolveTask = resolve;
-        	this._rejectTask = reject
 
         	// Initialize task
         	this._init().then(_ => {
@@ -228,8 +252,8 @@ class Task {
 	        	this._executeSteps(this._config.steps);
         	})
         	.catch(error => {
-        		console.error(error);
-        		this._rejectTask(error);
+        		this.log(error);
+        		this._resolveTask();
         	});
         });
 	}
@@ -237,7 +261,7 @@ class Task {
 	async failed(error) {
 		// Execute error steps if defined
 		if (this._config.onError !== undefined) {
-			console.log("\n**** Task failed - Starting onError process ****\n");
+			this.log("\n**** Task failed - Starting onError process ****\n");
 			const errorSteps = typeof this._config.onError === 'array'
 					? this._config.onError
 					: typeof this._config.onError === 'object'
@@ -250,49 +274,21 @@ class Task {
 		this._state = Task.FAILED;
 		await api.call({url: '/api/task/'+this._id, body: {r_state: Task.FAILED, f_execution_finish_date: new Date(), f_duration: duration}, method: 'put'});
 
-        console.error(`\n**** Process ended - ${duration}ms ****\n\tERROR\n`)
+        this.log(`\n**** Process ended - ${duration}ms ****\n\tERROR\n`)
 		if (error) {
-			console.error(error);
-			console.error('\n\n');
-
-			try {
-				const fileName = `error-file-${moment().format('DD-MM-YYYY')}.json`;
-				const filePath = `${__dirname}/../${fileName}`;
-
-				// Replacer parameter for JSON.stringify. It correctly prints error stacktrace
-				function replaceErrors(key, value) {
-				    if (value instanceof Error) {
-				        var error = {};
-				        Object.getOwnPropertyNames(value).forEach(function (key) {
-				            error[key] = value[key];
-				        });
-				        return error;
-				    }
-				    return value;
-				}
-				fs.writeFileSync(filePath, JSON.stringify(error, replaceErrors, 4), 'utf8');
-				await api.upload({
-					url: '/api/task/'+this._id+'/error_file',
-					method: 'post',
-					stream: fs.createReadStream(filePath)
-				});
-				fs.unlinkSync(filePath);
-			} catch(err) {
-				console.error("Couldn't send error file");
-				console.error(err);
-			}
-
+			this.log(error);
+			this.log('\n\n');
 		}
 
-		this._rejectTask();
+		this._resolveTask();
 	}
 
 	async finalize() {
 		const duration = this.elapsedTime();
-    	console.log(`\n**** Process ended - ${duration}ms ****\n\tSUCCESS\n\n`)
+    	this.log(`\n**** Process ended - ${duration}ms ****\n\tSUCCESS\n\n`)
 
     	if (Object.keys(this._sessionData).length)
-    		console.log(JSON.stringify(this._sessionData, null, 4));
+    		this.log(JSON.stringify(this._sessionData, null, 4));
 		this._state = Task.DONE;
 		// Update Task status
 		await api.call({url: '/api/task/'+this._id, body: {r_state: Task.DONE, f_execution_finish_date: new Date(), f_duration: duration}, method: 'put'});
@@ -300,9 +296,25 @@ class Task {
 		this._resolveTask();
 	}
 
+	async sendLogFile() {
+		try {
+			if (this._writeStream)
+				this._writeStream.close();
+			await api.upload({
+				url: '/api/task/'+this._id+'/logfile',
+				method: 'post',
+				stream: fs.createReadStream(this._logFilePath)
+			});
+			// fs.unlinkSync(this._logFilePath);
+		} catch(err) {
+			console.error("Couldn't send error file");
+			console.error(err);
+		}
+	}
+
 	inputUrl(details) {
     	if (!this._step)
-    		return console.error("Got url input while no step processing : "+details.url);
+    		return log("Got url input while no step processing : "+details.url);
 
     	// Assets loading, dismiss
     	if (details.url.toLowerCase().match(/.*\.(css|js|png|jpg|jpeg|woff)$/) != null)
@@ -310,7 +322,7 @@ class Task {
     	if (['dev-tools'].filter(ignore => details.url.includes(ignore)).length > 0)
     		return;
 
-    	// console.log("Task.inputUrl() : "+details.method+ '  -  '+details.url)
+    	// this.log("Task.inputUrl() : "+details.method+ '  -  '+details.url)
     	this._step.inputUrl(details);
 	}
 
@@ -322,11 +334,11 @@ class Task {
 
 	willDownload() {
 		if (!this._step) {
-			console.error("Trying to download file but there is no step processing");
+			this.log("Trying to download file but there is no step processing");
 			return;
 		}
 		if (!(this._downloading = this._step.downloadInfo)) {
-			console.error("Trying to download file but step haven't any download configured")
+			this.log("Trying to download file but step haven't any download configured")
 			return;
 		}
 
@@ -336,7 +348,7 @@ class Task {
 	}
 
 	downloadState(fileName, state) {
-		console.log(`${fileName} - ${state}`);
+		this.log(`${fileName} - ${state}`);
 		if (!this._step)
 			return;
 		this._step.downloadState(state);
