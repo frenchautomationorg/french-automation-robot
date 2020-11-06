@@ -114,8 +114,11 @@ class Task {
 			}
 
 			const toWrite = (typeof param === 'object' || typeof param === 'array' ? JSON.stringify(param, replaceErrors, 4) : param) + '\n';
-			this._writeStream.write(toWrite);
+
 			console.log(param);
+			if (this._writeStream.BaseStream !== null)
+				this._writeStream.write(toWrite);
+			else console.log("DIDNT NOT WRITE THE ABOVE");
 		} catch(err) {
 			console.error("Couldn't log to file");
 			console.error(err);
@@ -202,7 +205,7 @@ class Task {
 
 					// Create step
 					if (jsonStep.type == 'action')
-						this._step = new ScriptStep(resolveStep, rejectStep, jsonStep, this.window, this._domReady);
+						this._step = new ScriptStep(resolveStep, rejectStep, jsonStep, this.window, this.sequenceUtils, this._domReady);
 					else if (jsonStep.type == 'sequence')
 						this._step = new SequenceStep(resolveStep, rejectStep, jsonStep, this.window, this.sequenceUtils, this._domReady);
 
@@ -296,20 +299,27 @@ class Task {
 		this._resolveTask();
 	}
 
-	async sendLogFile() {
-		try {
-			if (this._writeStream)
-				this._writeStream.close();
-			await api.upload({
-				url: '/api/task/'+this._id+'/logfile',
-				method: 'post',
-				stream: fs.createReadStream(this._logFilePath)
+	sendLogFile() {
+		return new Promise((resolve, reject) => {
+			if (!this._writeStream)
+				return resolve();
+			this._writeStream.on('finish', async _ => {
+				try {
+					await api.upload({
+						url: '/api/task/'+this._id+'/logfile',
+						method: 'post',
+						stream: fs.createReadStream(this._logFilePath)
+					});
+					// fs.unlinkSync(this._logFilePath);
+
+				} catch(err) {
+					console.error("Couldn't send error file "+this._logFilePath);
+					console.error(err);
+				}
+				resolve();
 			});
-			// fs.unlinkSync(this._logFilePath);
-		} catch(err) {
-			console.error("Couldn't send error file");
-			console.error(err);
-		}
+			this._writeStream.close();
+		});
 	}
 
 	inputUrl(details) {

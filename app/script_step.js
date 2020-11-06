@@ -3,8 +3,9 @@ const lineReader = require('readline');
 const fs = require('fs-extra');
 
 class ScriptStep extends Step {
-	constructor(stepResolve, stepReject, jsonStep, win, isDomReady = false) {
+	constructor(stepResolve, stepReject, jsonStep, win, sequenceUtils, isDomReady = false) {
 		super(stepResolve, stepReject, jsonStep, win, isDomReady);
+		this.sequenceUtils = sequenceUtils;
 	}
 
 	//
@@ -76,6 +77,13 @@ class ScriptStep extends Step {
             }).on('close', _ => {
             	let script = lines.join('\n');
 
+            	let sessionDataStr;
+            	try {
+            		sessionDataStr = JSON.stringify(this.sequenceUtils.sessionData, null, 4);
+            		script = "sessionData = "+sessionDataStr+";\n\n"+script;
+            	} catch(err) {
+            		console.error("Couldn't prepend sessionData to script");
+            	}
         		this._script = script;
             	resolve();
             }).on('error', reject);
