@@ -283,6 +283,13 @@ class Task {
 			this.log('\n\n');
 		}
 
+		// Trace execution
+		let result = await api.call({url: '/api/execution/', body: {f_state: "ERROR", f_error_cause: error.error, f_execution_start_date: new Date(), f_execution_finish_date: new Date(), r_task_execution: this._id}, method: 'post'});
+		console.log("Execution ID : " + result.id);
+
+		// Send log file
+		await sendLogFile(result.id);
+
 		this._resolveTask();
 	}
 
@@ -295,6 +302,13 @@ class Task {
 		this._state = Task.DONE;
 		// Update Task status
 		await api.call({url: '/api/task/'+this._id, body: {r_state: Task.DONE, f_execution_finish_date: new Date(), f_duration: duration}, method: 'put'});
+
+		// Trace execution
+		let result = await api.call({url: '/api/execution/', body: {f_state: "SUCCESS", f_execution_start_date: new Date(), f_execution_finish_date: new Date(), fk_id_task: this._id}, method: 'post'});
+		console.log("Execution ID : " + result.id);
+
+		// Send log file on task
+		await sendLogFile();
 
 		this._resolveTask();
 	}
