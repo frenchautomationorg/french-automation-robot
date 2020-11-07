@@ -156,6 +156,7 @@ The parameter `utils` sent to `execute(utils)` contains :
   "api": { // Functions to use API connection
       "call": function(options) // Send a request, options should match `requestjs` requirements
       "upload": function(options) // Same as `call()` but using `options.stream` property to stream a file
+      "map": function(options) // Map values according to configuration entities in orchestrator
     }
   "waitDownloads": async function() // Return a promise that resolve when all downloads are done
 }
