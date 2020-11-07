@@ -6,7 +6,7 @@ const moment = require('moment');
 const ScriptStep = require('./script_step');
 const SequenceStep = require('./sequence_step');
 
-const robotjs = require('robotjs');
+//const robotjs = require('robotjs');
 
 class Task {
 	constructor(task, robot) {
@@ -191,7 +191,7 @@ class Task {
 			};
 
 			if (['action', 'sequence'].indexOf(jsonStep.type) == -1) {
-				stepError.error = `Unkown step type ${jsonStep.type}`;
+				stepError.error = `Unknown step type ${jsonStep.type}`;
 				return failed(stepError);
 			}
 
