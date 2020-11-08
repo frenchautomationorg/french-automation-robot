@@ -12,6 +12,7 @@ class Task {
 	constructor(task, robot) {
 		this._startTime = process.hrtime();
 		this._id = task.id;
+		this._id_execution = task.id_execution;
 		this._state = task.r_state.id;
 		this._env = task.f_data_flow;
 		this._filesToDownload = [];
@@ -56,6 +57,11 @@ class Task {
 
 		task._state = Task.PROCESSING;
 
+		// Instanciate new execution
+		let result_execution = await api.call({url: '/api/execution/', body: {f_execution_start_date: new Date(), r_task_execution: task.id}, method: 'post'});
+		console.log(result_execution.body.execution);
+		task.id_execution = result_execution.body.execution.id;
+
         return task;
 	}
 
@@ -65,11 +71,14 @@ class Task {
 	//
 
 	get id() {return this._id}
+	get id_execution() {return this._id_execution}
 	get robotId() {return this._robot.id}
 	get window() {return this._robot.window}
 	get state() {return this._state}
 	set state(newState) {this._state = newState}
 	get logFilePath() {return this._logFilePath}
+
+	set id_execution(id) { this._id_execution = id}
 
 	get sequenceUtils() {
 		return {
@@ -283,12 +292,8 @@ class Task {
 			this.log('\n\n');
 		}
 
-		// Trace execution
-		let result = await api.call({url: '/api/execution/', body: {f_state: "ERROR", f_error_cause: error.error, f_execution_start_date: new Date(), f_execution_finish_date: new Date(), r_task_execution: this._id}, method: 'post'});
-		console.log("Execution ID : " + result.id);
-
-		// Send log file
-		await sendLogFile(result.id);
+		// Update Execution state
+		await api.call({url: '/api/execution/'+this._id_execution, body: {f_state: "ERROR", f_error_cause: error.error, f_execution_finish_date: new Date()}, method: 'put'});
 
 		this._resolveTask();
 	}
@@ -303,12 +308,8 @@ class Task {
 		// Update Task status
 		await api.call({url: '/api/task/'+this._id, body: {r_state: Task.DONE, f_execution_finish_date: new Date(), f_duration: duration}, method: 'put'});
 
-		// Trace execution
-		let result = await api.call({url: '/api/execution/', body: {f_state: "SUCCESS", f_execution_start_date: new Date(), f_execution_finish_date: new Date(), fk_id_task: this._id}, method: 'post'});
-		console.log("Execution ID : " + result.id);
-
-		// Send log file on task
-		await sendLogFile();
+		// Update Execution state
+		await api.call({url: '/api/execution/'+this._id_execution, body: {f_state: "SUCCESS", f_execution_finish_date: new Date()}, method: 'put'});
 
 		this._resolveTask();
 	}
