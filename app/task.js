@@ -59,7 +59,6 @@ class Task {
 
 		// Instanciate new execution
 		let result_execution = await api.call({url: '/api/execution/', body: {f_execution_start_date: new Date(), r_task_execution: task.id}, method: 'post'});
-		console.log(result_execution.body.execution);
 		task.id_execution = result_execution.body.execution.id;
 
         return task;
@@ -279,6 +278,7 @@ class Task {
 					: typeof this._config.onError === 'object'
 						? [this._config.onError]
 						: [this._config.steps[this._config.onError]];
+
 			await this._executeSteps(errorSteps, true);
 		}
 
