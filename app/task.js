@@ -293,7 +293,17 @@ class Task {
 			else
 				errorSteps.push(stepFromType(this._config.onError));
 
-			await this._executeSteps(errorSteps, true);
+			// Assuming there is only one error step to proceed, we must send an array with this step 
+			function findElement(arr, propName, propValue) {
+				for (var i=0; i < arr.length; i++)
+				if (arr[i][propName] == propValue)
+				return arr[i];
+			}
+
+			let lastSteps = [];
+			lastSteps.push(findElement(this._config.steps, "name", errorSteps));
+			
+			await this._executeSteps(lastSteps, true);
 		}
 
 		const duration = this.elapsedTime();
@@ -327,6 +337,7 @@ class Task {
 
 		this._resolveTask();
 	}
+
 
 	sendLogFile() {
 		return new Promise((resolve, reject) => {
