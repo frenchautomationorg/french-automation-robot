@@ -102,13 +102,13 @@ class Robot {
 	            else if (state === 'progressing')
 	                if (item.isPaused())
 	                	this._task.downloadState(filename, 'paused');
-	        })
+	        });
 	        item.once('done', (event, state) => {
 	            if (state === 'completed')
 	            	this._task.downloadState(filename, 'success');
 	            else
 	            	this._task.downloadState(filename, 'error');
-	        })
+	        });
 	    });
 
 	    this.window.on('closed', _ => {

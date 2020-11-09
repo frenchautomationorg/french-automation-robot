@@ -94,6 +94,7 @@ class Step {
 	}
 
 	error(error) {
+		clearTimeout(this._timeout);
 		this._error(error);
 	}
 

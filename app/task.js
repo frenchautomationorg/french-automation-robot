@@ -12,7 +12,7 @@ class Task {
 	constructor(task, robot) {
 		this._startTime = process.hrtime();
 		this._id = task.id;
-		this._id_execution = task.id_execution;
+		this._executionId = task.id_execution;
 		this._state = task.r_state.id;
 		this._env = task.f_data_flow;
 		this._filesToDownload = [];
@@ -59,7 +59,7 @@ class Task {
 
 		// Instanciate new execution
 		let result_execution = await api.call({url: '/api/execution/', body: {f_execution_start_date: new Date(), r_task_execution: task.id}, method: 'post'});
-		task.id_execution = result_execution.body.execution.id;
+		task._executionId = result_execution.body.execution.id;
 
         return task;
 	}
@@ -70,14 +70,14 @@ class Task {
 	//
 
 	get id() {return this._id}
-	get id_execution() {return this._id_execution}
+	get executionId() {return this._executionId}
 	get robotId() {return this._robot.id}
 	get window() {return this._robot.window}
 	get state() {return this._state}
 	set state(newState) {this._state = newState}
 	get logFilePath() {return this._logFilePath}
 
-	set id_execution(id) { this._id_execution = id}
+	set executionId(id) { this._executionId = id}
 
 	get sequenceUtils() {
 		return {
@@ -218,7 +218,7 @@ class Task {
 
 					// Initialize and execute step
 					this._step.init(this._env).then(_ => {
-						this._step.execute()
+						this._step.execute();
 					})
 					.catch(rejectStep);
 				}, stepDelay);
@@ -273,37 +273,35 @@ class Task {
 		if (this._config.onError !== undefined) {
 			this.log("\n**** Task failed - Starting onError process ****\n");
 			const self = this;
-			function stepFromType(errorStep) {
-				let matchedStep;
-				if (typeof errorStep === 'string') {
-					let referencedError = self._config._steps.filter(step => step.name === errorStep);
-					matchedStep = referencedError.length ? referencedError[0] : null;
+			try {
+				function stepFromType(errorStep) {
+					let matchedStep;
+					if (typeof errorStep === 'string') {
+						let referencedError = self._config._steps.filter(step => step.name === errorStep);
+						matchedStep = referencedError.length ? referencedError[0] : null;
+					}
+					else if (typeof errorStep === 'object')
+						matchedStep = errorStep;
+					else if (!isNaN(errorStep))
+						matchedStep = self._config._steps[errorStep];
+
+					return matchedStep;
 				}
-				else if (typeof errorStep === 'object')
-					matchedStep = errorStep;
-				else if (!isNaN(errorStep))
-					matchedStep = self._config._steps[errorStep];
-			}
 
-			let errorSteps = [];
-			if (typeof this._config.onError === 'array') {
-				for (const errorStep of this._config.onError)
-					errorSteps.push(stepFromType(errorStep))
-			}
-			else
-				errorSteps.push(stepFromType(this._config.onError));
+				let errorSteps = [];
+				if (this._config.onError instanceof Array) {
+					for (const errorStep of this._config.onError)
+						errorSteps.push(stepFromType(errorStep))
+				}
+				else
+					errorSteps.push(stepFromType(this._config.onError));
 
-			// Assuming there is only one error step to proceed, we must send an array with this step 
-			function findElement(arr, propName, propValue) {
-				for (var i=0; i < arr.length; i++)
-				if (arr[i][propName] == propValue)
-				return arr[i];
-			}
+				await this._executeSteps(errorSteps, true);
 
-			let lastSteps = [];
-			lastSteps.push(findElement(this._config.steps, "name", errorSteps));
-			
-			await this._executeSteps(lastSteps, true);
+			} catch(err) {
+				console.error("errorStep ERROR");
+				console.error(err);
+			}
 		}
 
 		const duration = this.elapsedTime();
@@ -317,7 +315,12 @@ class Task {
 		}
 
 		// Update Execution state
-		await api.call({url: '/api/execution/'+this._id_execution, body: {f_state: "ERROR", f_error_cause: error.error, f_execution_finish_date: new Date()}, method: 'put'});
+		try {
+			await api.call({url: '/api/execution/'+this._executionId, body: {f_state: "ERROR", f_execution_finish_date: new Date()}, method: 'put'});
+		} catch(err) {
+			console.error("Couldn't update execution state");
+			console.error(err);
+		}
 
 		this._resolveTask();
 	}
@@ -333,7 +336,7 @@ class Task {
 		await api.call({url: '/api/task/'+this._id, body: {r_state: Task.DONE, f_execution_finish_date: new Date(), f_duration: duration}, method: 'put'});
 
 		// Update Execution state
-		await api.call({url: '/api/execution/'+this._id_execution, body: {f_state: "SUCCESS", f_execution_finish_date: new Date()}, method: 'put'});
+		await api.call({url: '/api/execution/'+this._executionId, body: {f_state: "SUCCESS", f_execution_finish_date: new Date()}, method: 'put'});
 
 		this._resolveTask();
 	}
@@ -346,7 +349,7 @@ class Task {
 			this._writeStream.on('finish', async _ => {
 				try {
 					await api.upload({
-						url: '/api/task/'+this._id+'/logfile',
+						url: '/api/execution/'+this._executionId+'/logfile',
 						method: 'post',
 						stream: fs.createReadStream(this._logFilePath)
 					});
