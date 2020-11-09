@@ -77,14 +77,25 @@ class ScriptStep extends Step {
             }).on('close', _ => {
             	let script = lines.join('\n');
 
-            	let sessionDataStr;
+            	let sessionDataStr, envStr;
             	try {
             		sessionDataStr = JSON.stringify(this.sequenceUtils.sessionData, null, 4);
-            		script = "sessionData = "+sessionDataStr+";\n\n"+script;
             	} catch(err) {
             		console.error("Couldn't prepend sessionData to script");
             	}
-        		this._script = script;
+            	try {
+            		envStr = JSON.stringify(this.sequenceUtils.env, null, 4);
+            	} catch(err) {
+            		console.error("Couldn't prepend env to script");
+            	}
+
+            	this._script = '';
+            	if (sessionDataStr)
+            		this._script += `sessionData = ${sessionDataStr};\n`;
+            	if (envStr)
+            		this._script += `env = ${envStr};\n`;
+        		this._script += script;
+
             	resolve();
             }).on('error', reject);
 		});

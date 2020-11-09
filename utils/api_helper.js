@@ -157,7 +157,6 @@ module.exports = {
 				else {
 					resolve(data.response.body[myEntity + 's'][0][myTargetField]);
 				}
-				
 			})
 			.catch(function(error) {
 				console.error(error);

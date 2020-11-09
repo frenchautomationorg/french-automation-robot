@@ -272,11 +272,26 @@ class Task {
 		// Execute error steps if defined
 		if (this._config.onError !== undefined) {
 			this.log("\n**** Task failed - Starting onError process ****\n");
-			const errorSteps = typeof this._config.onError === 'array'
-					? this._config.onError
-					: typeof this._config.onError === 'object'
-						? [this._config.onError]
-						: [this._config.steps[this._config.onError]];
+			const self = this;
+			function stepFromType(errorStep) {
+				let matchedStep;
+				if (typeof errorStep === 'string') {
+					let referencedError = self._config._steps.filter(step => step.name === errorStep);
+					matchedStep = referencedError.length ? referencedError[0] : null;
+				}
+				else if (typeof errorStep === 'object')
+					matchedStep = errorStep;
+				else if (!isNaN(errorStep))
+					matchedStep = self._config._steps[errorStep];
+			}
+
+			let errorSteps = [];
+			if (typeof this._config.onError === 'array') {
+				for (const errorStep of this._config.onError)
+					errorSteps.push(stepFromType(errorStep))
+			}
+			else
+				errorSteps.push(stepFromType(this._config.onError));
 
 			await this._executeSteps(errorSteps, true);
 		}
