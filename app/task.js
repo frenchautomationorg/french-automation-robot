@@ -6,12 +6,13 @@ const moment = require('moment');
 const ScriptStep = require('./script_step');
 const SequenceStep = require('./sequence_step');
 
-const robotjs = require('robotjs');
+//const robotjs = require('robotjs');
 
 class Task {
 	constructor(task, robot) {
 		this._startTime = process.hrtime();
 		this._id = task.id;
+		this._id_execution = task.id_execution;
 		this._state = task.r_state.id;
 		this._env = task.f_data_flow;
 		this._filesToDownload = [];
@@ -56,6 +57,10 @@ class Task {
 
 		task._state = Task.PROCESSING;
 
+		// Instanciate new execution
+		let result_execution = await api.call({url: '/api/execution/', body: {f_execution_start_date: new Date(), r_task_execution: task.id}, method: 'post'});
+		task.id_execution = result_execution.body.execution.id;
+
         return task;
 	}
 
@@ -65,11 +70,14 @@ class Task {
 	//
 
 	get id() {return this._id}
+	get id_execution() {return this._id_execution}
 	get robotId() {return this._robot.id}
 	get window() {return this._robot.window}
 	get state() {return this._state}
 	set state(newState) {this._state = newState}
 	get logFilePath() {return this._logFilePath}
+
+	set id_execution(id) { this._id_execution = id}
 
 	get sequenceUtils() {
 		return {
@@ -190,7 +198,7 @@ class Task {
 			};
 
 			if (['action', 'sequence'].indexOf(jsonStep.type) == -1) {
-				stepError.error = `Unkown step type ${jsonStep.type}`;
+				stepError.error = `Unknown step type ${jsonStep.type}`;
 				return failed(stepError);
 			}
 
@@ -269,6 +277,7 @@ class Task {
 					: typeof this._config.onError === 'object'
 						? [this._config.onError]
 						: [this._config.steps[this._config.onError]];
+
 			await this._executeSteps(errorSteps, true);
 		}
 
@@ -282,6 +291,9 @@ class Task {
 			this.log('\n\n');
 		}
 
+		// Update Execution state
+		await api.call({url: '/api/execution/'+this._id_execution, body: {f_state: "ERROR", f_error_cause: error.error, f_execution_finish_date: new Date()}, method: 'put'});
+
 		this._resolveTask();
 	}
 
@@ -294,6 +306,9 @@ class Task {
 		this._state = Task.DONE;
 		// Update Task status
 		await api.call({url: '/api/task/'+this._id, body: {r_state: Task.DONE, f_execution_finish_date: new Date(), f_duration: duration}, method: 'put'});
+
+		// Update Execution state
+		await api.call({url: '/api/execution/'+this._id_execution, body: {f_state: "SUCCESS", f_execution_finish_date: new Date()}, method: 'put'});
 
 		this._resolveTask();
 	}

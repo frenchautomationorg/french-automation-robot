@@ -159,6 +159,7 @@ class Robot {
 			// Start task execution
 			this._task = task;
 			await this._task.start();
+
 			// Send log file to API
 			await this._task.sendLogFile();
 

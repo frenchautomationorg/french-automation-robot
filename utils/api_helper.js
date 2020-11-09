@@ -122,6 +122,49 @@ module.exports = {
 			apiForm.append('file', callOptions.stream);
 		});
 	},
+	map: function (myEntity, myField, myValue, myTargetField) {
+		return new Promise(function(resolve, reject) {
+			if (!credentials) {
+				console.error("Can't make API call. No credentials defined");
+				return reject();
+			}
+
+			let callOptions = {};
+
+			callOptions.url = '/api/' + myEntity + '/?' + myField + '=' + myValue;
+			callOptions.method = 'get';
+
+
+			// Merge default and provided options
+			for (var defaultOpt in defaultOptions)
+				if (!callOptions[defaultOpt])
+					callOptions[defaultOpt] = defaultOptions[defaultOpt];
+
+			if (!callOptions.method)
+				callOptions.method = 'get';
+			if (!callOptions.url)
+				return reject("No URL for API call");
+
+			callOptions.originUrl = callOptions.url;
+
+			call(callOptions, 0)
+			.then(function (data) {
+
+				console.log(JSON.stringify(data));
+				if (!data) {
+					resolve();
+				}
+				else {
+					resolve(data.response.body[myEntity + 's'][0][myTargetField]);
+				}
+				
+			})
+			.catch(function(error) {
+				console.error(error);
+				reject(error);
+			});
+		});
+	},
 	token: function() {
 		return BEARER_TOKEN;
 	},
