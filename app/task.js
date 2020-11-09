@@ -118,7 +118,6 @@ class Task {
 			console.log(param);
 			if (this._writeStream.BaseStream !== null)
 				this._writeStream.write(toWrite);
-			else console.log("DIDNT NOT WRITE THE ABOVE");
 		} catch(err) {
 			console.error("Couldn't log to file");
 			console.error(err);
