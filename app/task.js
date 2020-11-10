@@ -102,6 +102,12 @@ class Task {
 	// PRIVATE FUNCTIONS
 	//
 
+	elapsedTime() {
+		const nanosec_per_sec = 1e9;
+		const hrTime = process.hrtime(this._startTime);
+		return hrTime[0] * 1000 + hrTime[1] / 1000000;// Convert to milliseconds
+	}
+
 	log(param) {
 		try {
 			if (!this._writeStream) {
@@ -133,43 +139,63 @@ class Task {
 		}
 	}
 
-	async _init() {
+	sendLogFile() {
+		return new Promise(resolve => {
+			if (!this._writeStream)
+				return resolve();
+			this._writeStream.on('finish', async _ => {
+				try {
+					await api.upload({
+						url: '/api/execution/'+this._executionId+'/logfile',
+						method: 'post',
+						stream: fs.createReadStream(this._logFilePath)
+					});
+					// fs.unlinkSync(this._logFilePath);
+
+				} catch(err) {
+					console.error("Couldn't send error file "+this._logFilePath);
+					console.error(err);
+				}
+				resolve();
+			});
+			this._writeStream.close();
+		});
+	}
+
+	async init() {
 		this.log(`\n**** Initialization ****\n`);
 
 		try {
-			// Load data
-			{
-				// Download zip file
-				let result = await api.call({url: '/api/task/'+this._id+'/downloadProgram', encoding: null});
-				if (result.response.statusCode == 404)
-					throw new Error("Task doesn't have a program file");
-				fs.writeFileSync('./program_zip.zip', result.body);
+			// Download zip file
+			let result = await api.call({url: '/api/task/'+this._id+'/downloadProgram', encoding: null});
+			if (result.response.statusCode == 404)
+				throw new Error("Task doesn't have a program file");
+			fs.writeFileSync('./program_zip.zip', result.body);
 
-				// Clear previous task program files
-				if (fs.existsSync('./exec/program'))
-					fs.removeSync('./exec/program');
+			// Clear previous task program files
+			if (fs.existsSync('./exec/program'))
+				fs.removeSync('./exec/program');
 
-				// Unzip program folder
-				await new Promise((resolve, reject) => {
-					fs.createReadStream('./program_zip.zip')
-						.pipe(unzip.Extract({
-							path: './exec/program'
-						}))
-						.on('close', resolve)
-						.on('error', reject);
-				});
-				// Delete downloaded zip
-				fs.removeSync('./program_zip.zip');
+			// Unzip program folder
+			await new Promise((resolve, reject) => {
+				fs.createReadStream('./program_zip.zip')
+					.pipe(unzip.Extract({
+						path: './exec/program'
+					}))
+					.on('close', resolve)
+					.on('error', reject);
+			});
+			// Delete downloaded zip
+			fs.removeSync('./program_zip.zip');
 
-				// Parse env
-				try {
-					this._env = this._env && this._env != '' ? JSON.parse(this._env) : {};
-				} catch (error) {throw new Error("Task f_data_flow couldn't be parsed\n"+JSON.stringify(error, null, 4));}
-				// Parse steps
-				try {
-					this._config = JSON.parse(fs.readFileSync(`${__dirname}/../exec/program/config.json`))
-				} catch (error) {throw new Error("Task config.json couldn't be parsed\n"+JSON.stringify(error, null, 4));}
-			}
+			// Parse env
+			try {
+				this._env = this._env && this._env != '' ? JSON.parse(this._env) : {};
+			} catch (error) {throw new Error("Task f_data_flow couldn't be parsed\n"+JSON.stringify(error, null, 4));}
+			// Parse steps
+			try {
+				this._config = JSON.parse(fs.readFileSync(`${__dirname}/../exec/program/config.json`))
+			} catch (error) {throw new Error("Task config.json couldn't be parsed\n"+JSON.stringify(error, null, 4));}
 
 		} catch (error) {
 			this.log(`\tFAILED\n`);
@@ -181,14 +207,11 @@ class Task {
 		this.log(`\tSUCCESS\n`);
 	}
 
-	async _executeSteps(steps, isErrorStep = false) {
-		const finalize = !isErrorStep ? _ => {this.finalize()} : _ => {};
-		const failed = !isErrorStep ? error => { this.failed(error)} : error => {this.log("onError step failed"); this.log(error); };
-
+	async executeSteps(steps, isErrorStep = false) {
 		if (!steps || steps.length == 0 || steps.filter(step => !!step).length != steps.length) {
 			if (isErrorStep)
 				this.log("Invalid onError definition");
-			return finalize();
+			return;
 		}
 
 		for (const [stepIdx, jsonStep] of steps.entries()) {
@@ -199,7 +222,7 @@ class Task {
 
 			if (['action', 'sequence'].indexOf(jsonStep.type) == -1) {
 				stepError.error = `Unknown step type ${jsonStep.type}`;
-				return failed(stepError);
+				throw stepError;
 			}
 
 			// Create, init and execute step
@@ -210,11 +233,13 @@ class Task {
 			        this.log(`Executing ${isErrorStep ? "onError step" : "step"} ${jsonStep.name || stepIdx+1}:`);
 			        this.log(JSON.stringify(jsonStep, null, 4));
 
+			        // Provide promise resolve/reject to step so it can and task process at any time
+			        const stepParams = [resolveStep, rejectStep, jsonStep, this.window, this.sequenceUtils, this._domReady];
 					// Create step
 					if (jsonStep.type == 'action')
-						this._step = new ScriptStep(resolveStep, rejectStep, jsonStep, this.window, this.sequenceUtils, this._domReady);
+						this._step = new ScriptStep(...stepParams);
 					else if (jsonStep.type == 'sequence')
-						this._step = new SequenceStep(resolveStep, rejectStep, jsonStep, this.window, this.sequenceUtils, this._domReady);
+						this._step = new SequenceStep(...stepParams);
 
 					// Initialize and execute step
 					this._step.init(this._env).then(_ => {
@@ -237,43 +262,17 @@ class Task {
 					this.domReady(false);
 			} catch (error) {
 				stepError.error = error;
-				return failed(stepError);
+				throw stepError;
 			}
 		}
-
-		finalize();
 	}
 
-
-	//
-	// PUBLIC FUNCTIONS
-	//
-
-	async start() {
-        this.log(`\n*********************************\n**** Task #` + this.id + ` process STARTED ****\n*********************************`);
-
-        await new Promise((resolve) => {
-        	// Set main resolve to task to be able to finish process anytime
-        	this._resolveTask = resolve;
-
-        	// Initialize task
-        	this._init().then(_ => {
-	        	// Start first step
-	        	this._executeSteps(this._config.steps);
-        	})
-        	.catch(error => {
-        		this.log(error);
-        		this._resolveTask();
-        	});
-        });
-	}
-
-	async failed(error) {
+	async executeErrorSteps() {
 		// Execute error steps if defined
 		if (this._config.onError !== undefined) {
-			this.log("\n**** Task failed - Starting onError process ****\n");
-			const self = this;
 			try {
+				this.log("\n**** Task failed - Starting onError process ****\n");
+				const self = this;
 				function stepFromType(errorStep) {
 					let matchedStep;
 					if (typeof errorStep === 'string') {
@@ -284,11 +283,10 @@ class Task {
 						matchedStep = errorStep;
 					else if (!isNaN(errorStep))
 						matchedStep = self._config._steps[errorStep];
-
 					return matchedStep;
 				}
 
-				let errorSteps = [];
+				const errorSteps = [];
 				if (this._config.onError instanceof Array) {
 					for (const errorStep of this._config.onError)
 						errorSteps.push(stepFromType(errorStep))
@@ -296,73 +294,79 @@ class Task {
 				else
 					errorSteps.push(stepFromType(this._config.onError));
 
-				await this._executeSteps(errorSteps, true);
+				await this.executeSteps(errorSteps, true);
 
 			} catch(err) {
-				console.error("errorStep ERROR");
-				console.error(err);
+				this.log("onError step failed");
+				this.log(err);
 			}
 		}
+	}
 
-		const duration = this.elapsedTime();
-		this._state = Task.FAILED;
-		await api.call({url: '/api/task/'+this._id, body: {r_state: Task.FAILED, f_execution_finish_date: new Date(), f_duration: duration}, method: 'put'});
-
-        this.log(`\n**** Process ended - ${duration}ms ****\n\tERROR\n`)
-		if (error) {
-			this.log(error);
-			this.log('\n\n');
-		}
-
-		// Update Execution state
+	async failed(error) {
 		try {
+			const duration = this.elapsedTime();
+
+	        this.log(`\n**** Process ended - ${duration}ms ****\n\tERROR\n`)
+			if (error) {
+				this.log(error);
+				this.log('\n\n');
+			}
+
+			this._state = Task.FAILED;
+			await api.call({url: '/api/task/'+this._id, body: {r_state: Task.FAILED, f_execution_finish_date: new Date(), f_duration: duration}, method: 'put'});
 			await api.call({url: '/api/execution/'+this._executionId, body: {f_state: "ERROR", f_execution_finish_date: new Date()}, method: 'put'});
 		} catch(err) {
-			console.error("Couldn't update execution state");
-			console.error(err);
+			this.log("Unable to update task's status in `failed()`");
+			this.log(err);
 		}
-
-		this._resolveTask();
 	}
 
 	async finalize() {
-		const duration = this.elapsedTime();
-    	this.log(`\n**** Process ended - ${duration}ms ****\n\tSUCCESS\n\n`)
+		try {
+			const duration = this.elapsedTime();
+	    	this.log(`\n**** Process ended - ${duration}ms ****\n\tSUCCESS\n\n`)
 
-    	if (Object.keys(this._sessionData).length)
-    		this.log(JSON.stringify(this._sessionData, null, 4));
-		this._state = Task.DONE;
-		// Update Task status
-		await api.call({url: '/api/task/'+this._id, body: {r_state: Task.DONE, f_execution_finish_date: new Date(), f_duration: duration}, method: 'put'});
+	    	if (Object.keys(this._sessionData).length)
+	    		this.log(JSON.stringify(this._sessionData, null, 4));
+			this._state = Task.DONE;
+			// Update Task status
+			await api.call({url: '/api/task/'+this._id, body: {r_state: Task.DONE, f_execution_finish_date: new Date(), f_duration: duration}, method: 'put'});
 
-		// Update Execution state
-		await api.call({url: '/api/execution/'+this._executionId, body: {f_state: "SUCCESS", f_execution_finish_date: new Date()}, method: 'put'});
-
-		this._resolveTask();
+			// Update Execution state
+			await api.call({url: '/api/execution/'+this._executionId, body: {f_state: "SUCCESS", f_execution_finish_date: new Date()}, method: 'put'});
+		} catch(err) {
+			this.log("Unable to update task's status in `finalize()`");
+			this.log(err);
+		}
 	}
 
+	//
+	// PUBLIC FUNCTIONS
+	//
 
-	sendLogFile() {
-		return new Promise((resolve, reject) => {
-			if (!this._writeStream)
-				return resolve();
-			this._writeStream.on('finish', async _ => {
-				try {
-					await api.upload({
-						url: '/api/execution/'+this._executionId+'/logfile',
-						method: 'post',
-						stream: fs.createReadStream(this._logFilePath)
-					});
-					// fs.unlinkSync(this._logFilePath);
+	async start() {
+        try {
+        	this.log(`\n*********************************\n**** Task #` + this.id + ` process STARTED ****\n*********************************`);
 
-				} catch(err) {
-					console.error("Couldn't send error file "+this._logFilePath);
-					console.error(err);
-				}
-				resolve();
-			});
-			this._writeStream.close();
-		});
+	    	// Initialize task
+	    	await this.init();
+		    try {
+		    	// Execute steps array
+		    	await this.executeSteps(this._config.steps);
+
+		    } catch(stepError) {
+		    	// Execute onError and re-throw so `failed()` is executed
+		    	await this.executeErrorSteps();
+		    	throw stepError;
+		    }
+
+    		await this.finalize();
+	    } catch(err) {
+	    	await this.failed(err);
+	    } finally {
+	    	await this.sendLogFile();
+	    }
 	}
 
 	inputUrl(details) {
@@ -377,12 +381,6 @@ class Task {
 
     	// this.log("Task.inputUrl() : "+details.method+ '  -  '+details.url)
     	this._step.inputUrl(details);
-	}
-
-	elapsedTime() {
-		const nanosec_per_sec = 1e9;
-		const hrTime = process.hrtime(this._startTime);
-		return hrTime[0] * 1000 + hrTime[1] / 1000000;// Convert to milliseconds
 	}
 
 	willDownload() {

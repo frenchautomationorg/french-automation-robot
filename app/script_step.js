@@ -2,15 +2,24 @@ const Step = require('./step');
 const lineReader = require('readline');
 const fs = require('fs-extra');
 
+let CONSOLE_ERROR;
+let PREPENDED_LINES = 0;
+
 class ScriptStep extends Step {
 	constructor(stepResolve, stepReject, jsonStep, win, sequenceUtils, isDomReady = false) {
 		super(stepResolve, stepReject, jsonStep, win, isDomReady);
 		this.sequenceUtils = sequenceUtils;
+
+		CONSOLE_ERROR = undefined;
 	}
 
 	//
 	// PRIVATE FUNCTIONS
 	//
+	consoleMessage(event, level, message, line, sourceId) {
+		if (level === 3)
+			CONSOLE_ERROR = `${message} - line:${line - PREPENDED_LINES}`.replace(/^Uncaught /, '');
+	}
 
 	_executeScript() {
 		// Dom is not ready, register that script should be executed when dom becomes ready
@@ -19,6 +28,9 @@ class ScriptStep extends Step {
 			return;
 		}
 		this._scriptWaiting = false;
+
+        this._window.webContents.removeListener('console-message', this.consoleMessage);
+        this._window.webContents.on('console-message', this.consoleMessage);
 
         // Execute step script
         this._window.webContents.executeJavaScript(this._script, true).then(scriptData => {
@@ -40,7 +52,9 @@ class ScriptStep extends Step {
         	if (!this._endWith)
         		this.success();
         }).catch(error => {
-        	this.error(error);
+        	if (CONSOLE_ERROR)
+        		error = CONSOLE_ERROR;
+    		this.error(error);
         });
     }
 
@@ -94,6 +108,8 @@ class ScriptStep extends Step {
             		this._script += `sessionData = ${sessionDataStr};\n`;
             	if (envStr)
             		this._script += `env = ${envStr};\n`;
+            	PREPENDED_LINES = this._script.split('\n').length+1;
+
         		this._script += script;
 
             	resolve();

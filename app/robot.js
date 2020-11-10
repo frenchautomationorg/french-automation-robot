@@ -124,7 +124,7 @@ class Robot {
 	    this._browserInitialized = true;
 	}
 
-	_end(rerun) {
+	_end() {
 		// Manualy delete task to ensure that garbage collector resets any unfinished promise/timeout
 		delete this._task;
 
@@ -132,10 +132,6 @@ class Robot {
 		if (this.window) {
 			this.window.destroy()
 			this._browserInitialized = false;
-		}
-		if (rerun) {
-			console.log("Fetching new task in 5000ms");
-			setTimeout(_ => { this.run() }, 5000);
 		}
 	}
 
@@ -145,33 +141,34 @@ class Robot {
 	//
 
 	async run() {
-		// Load task if available
+		let nextTimeout = 5000;
 		try {
-			const task = await Task.fetch(this);
-			if (!task) {
-	        	console.log("No task found - Retry in 5000ms");
-				return setTimeout(_=> {this.run()}, 5000);
+			// Load task if available
+			try {
+				this._task = await Task.fetch(this);
+				if (!this._task) {
+		        	console.log("No task found");
+					return;
+				}
+			} catch(err) {
+				console.error("Couldn't fetch task :");
+				console.error(err);
+				return nextTimeout = 30000;
 			}
 
 			// Init working browser
 			this._initBrowser();
-
-			// Start task execution
-			this._task = task;
+			// Execute task
 			await this._task.start();
 
-			// Send log file to API
-			await this._task.sendLogFile();
-
-			this._end(true);
-
-		} catch(error) {
-			console.error("Couldn't fetch task :");
-			console.error(error);
-			console.error("Retrying in 30000ms");
-			setTimeout(_ => { this.run() }, 30000);
+		} catch(err) {
+			console.error("Unexpected error during task execution");
+			console.error(err);
+		} finally {
+			this._end();
+			console.log(`Fetching task in ${nextTimeout}`);
+			setTimeout(_ => { this.run() }, nextTimeout);
 		}
-
 	}
 
 	stop() {
