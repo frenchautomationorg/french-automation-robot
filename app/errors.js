@@ -49,3 +49,10 @@ exports.ApiError = class ApiError extends AutomationError {
         }
     }
 }
+
+exports.CustomError = class CustomError extends AutomationError {
+    constructor(code) {
+        super(code);
+        this.code = code;
+    }
+}

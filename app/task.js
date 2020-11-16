@@ -6,7 +6,7 @@ const moment = require('moment');
 const ScriptStep = require('./script_step');
 const SequenceStep = require('./sequence_step');
 
-const { TaskError } = require('./errors');
+const { TaskError, CustomError } = require('./errors');
 
 //const robotjs = require('robotjs');
 
@@ -83,13 +83,16 @@ class Task {
 
 	get snippetUtils() {
 		return {
-    		"window": this.window,
-    		"robotId": this.robotId,
-    		"taskId": this.id,
-    		"env": this._env,
-    		"sessionData": this._sessionData,
-    		"api": api,
-    		"waitDownloads": async _ => {
+    		window: this.window,
+    		robotId: this.robotId,
+    		taskId: this.id,
+    		env: this._env,
+    		sessionData: this._sessionData,
+    		api: api,
+    		error: code => {
+    			return new CustomError(code);
+    		},
+    		waitDownloads: async _ => {
     			await Promise.allSettled(this._downloads.map(download => download.promise));
     		}
     	}
