@@ -23,7 +23,7 @@ class Robot {
 	//
 
 	get id() {
-		let credentials = api.credentials();
+		const credentials = api.credentials();
 		return credentials ? credentials.id : -1;
 	}
 
@@ -51,7 +51,7 @@ class Robot {
 	        minimizable: false,
 	        resizable: true,
 	        webPreferences: { nodeIntegration: false } })
-	    this.window.openDevTools();
+	    // this.window.openDevTools();
 
 	    // When request is complete, notify task so it can continue ongoing task processing
         this.window.webContents.session.webRequest.onCompleted((details, callback) => {
@@ -88,27 +88,29 @@ class Robot {
         });
 
 	    this.window.webContents.session.on('will-download', (event, item, webContents) => {
-	        // Retrieve name of file defined in current step
-	        const filename = this._task.willDownload();
-	        if (!filename)
-	        	return;
+	    	if (!this._task)
+	    		return;
+		  item.setSavePath('/tmp/'+item.getFilename());
 
-	        item.setSavePath(`./exec/program/download/${filename}`);
-
-	        item.on('updated', (event, state) => {
-	        	this._task.downloadState(filename, 'pending');
-	            if (state === 'interrupted')
-	            	this._task.downloadState(filename, 'interrupted');
-	            else if (state === 'progressing')
-	                if (item.isPaused())
-	                	this._task.downloadState(filename, 'paused');
-	        });
-	        item.once('done', (event, state) => {
-	            if (state === 'completed')
-	            	this._task.downloadState(filename, 'success');
-	            else
-	            	this._task.downloadState(filename, 'error');
-	        });
+		  item.on('updated', (event, state) => {
+		    if (state === 'interrupted') {
+		      console.log('Le téléchargement est interrompu mais peut être redémarrer')
+		    } else if (state === 'progressing') {
+		      if (item.isPaused()) {
+		        console.log('Le téléchargement est en pause')
+		      } else {
+		        console.log(`Received bytes: ${item.getReceivedBytes()}`)
+		      }
+		    }
+		  })
+		  item.once('done', (event, state) => {
+		    if (state === 'completed') {
+		      console.log('Téléchargement réussi')
+		    } else {
+		      console.log(`Téléchargement échoué : ${state}`)
+		    }
+		  })
+	    	// this._task.willDownload(item);
 	    });
 
 	    this.window.on('closed', _ => {
@@ -130,7 +132,8 @@ class Robot {
 
 		// Destroy window to reset current page and session
 		if (this.window) {
-			this.window.destroy()
+			this.window.destroy();
+			delete this._window;
 			this._browserInitialized = false;
 		}
 	}
@@ -150,6 +153,7 @@ class Robot {
 		        	console.log("No task found");
 					return;
 				}
+
 			} catch(err) {
 				console.error("Couldn't fetch task :");
 				console.error(err);

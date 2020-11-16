@@ -1,15 +1,16 @@
-var request = require('request');
+const request = require('request');
 const fs = require('fs-extra');
+const { ApiError } = require('../app/errors');
 
-var defaultOptions = {
+const defaultOptions = {
 	rejectUnauthorized: false,
 	json: true,
 	headers: {'content-type': 'application/json'}
 }
-var BEARER_TOKEN = 'fakeInitToken';
-var MAX_TOKEN_TRY = 20
+let BEARER_TOKEN = 'fakeInitToken';
+const MAX_TOKEN_TRY = 5;
 
-var credentials;
+let credentials;
 
 function getToken() {
 	return new Promise(function(resolve, reject) {
@@ -35,7 +36,7 @@ function getToken() {
 function call(callOptions, loopCount) {
 	return new Promise(function(resolve, reject) {
 		if (loopCount >= MAX_TOKEN_TRY)
-			return reject("Couldn't get Bearer Token");
+			return reject(new ApiError("Couldn't get Bearer Token"));
 
 		// Add bearer token to url
 		callOptions.url = callOptions.originUrl.indexOf('?') != -1 ?
@@ -45,17 +46,22 @@ function call(callOptions, loopCount) {
 		// callOptions.forever = true;
 
 		if (!request[callOptions.method])
-			return reject("Bad method "+callOptions.method+' for API request');
+			return reject(new ApiError("Bad method "+callOptions.method+' for API request'));
 
 		request[callOptions.method.toLowerCase()](callOptions, function(error, response, body) {
-			if (error || response.statusCode == '500')
-				return reject(error);
+			if (error)
+				return reject(new ApiError(error));
+			if (![200, 302, 401, 403].includes(response.statusCode)) {
+				return reject(new ApiError(response.statusMessage, response));
+			}
 
 			// Bad or expired Token, refresh token and call again
 			if (response.statusCode == '403' || response.statusCode == '401') {
 				getToken().then(function() {
 					call(callOptions, ++loopCount).then(resolve).catch(reject);
-				}).catch(reject);
+				}).catch(err => {
+					reject(new ApiError(err));
+				});
 			}
 			else
 				resolve({error: error, response: response, body: body});
@@ -64,32 +70,24 @@ function call(callOptions, loopCount) {
 }
 
 module.exports = {
-	call: function (callOptions) {
-		return new Promise(function(resolve, reject) {
-			if (!credentials) {
-				console.error("Can't make API call. No credentials defined");
-				return reject();
-			}
+	call: async (callOptions) => {
+		if (!credentials) {
+			throw new ApiError("Can't make API call. No credentials defined");
+		}
 
-			// Merge default and provided options
-			for (var defaultOpt in defaultOptions)
-				if (!callOptions[defaultOpt])
-					callOptions[defaultOpt] = defaultOptions[defaultOpt];
+		// Merge default and provided options
+		for (var defaultOpt in defaultOptions)
+			if (!callOptions[defaultOpt])
+				callOptions[defaultOpt] = defaultOptions[defaultOpt];
 
-			if (!callOptions.method)
-				callOptions.method = 'get';
-			if (!callOptions.url)
-				return reject("No URL for API call");
+		if (!callOptions.method)
+			callOptions.method = 'get';
+		if (!callOptions.url)
+			throw new ApiError("No URL for API call");
 
-			callOptions.originUrl = callOptions.url;
+		callOptions.originUrl = callOptions.url;
 
-			call(callOptions, 0)
-			.then(resolve)
-			.catch(function(error) {
-				console.error(error);
-				reject(error);
-			});
-		});
+		return await call(callOptions, 0);
 	},
 	upload: function(callOptions) {
 		return new Promise(function(resolve,reject) {

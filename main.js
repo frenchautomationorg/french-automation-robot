@@ -137,11 +137,11 @@ ipcMain.on('synchronous-message', (event, arg) => {
     else if (arg.method == 'post') {
         switch (arg.action) {
             case 'launchBot':
-                console.log("launchBot");
                 mainWindow.loadFile('./html/running.html')
                 mainWindow.webContents.executeJavaScript(`document.getElementById("id").innerHTML = "${robot.id}";`);
 
                 robot.run();
+                console.log("Robot running...");
             break;
 
             case 'setConfig':

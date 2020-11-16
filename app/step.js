@@ -1,8 +1,9 @@
+const { ApiError, StepError, ScriptError, SequenceError } = require('./errors');
 
 class Step {
-	constructor(resolveStep, rejectStep, jsonStep, win, isDomReady) {
-		this._success = resolveStep;
-		this._error = rejectStep;
+	constructor(resolveStep, rejectStep, jsonStep, win, log, isDomReady) {
+		this._resolveStep = resolveStep;
+		this._rejectStep = rejectStep;
 		this._sessionData = {};
 
 		if (jsonStep.startWith && typeof jsonStep.startWith.expected === 'undefined')
@@ -14,7 +15,7 @@ class Step {
 			_startWith: jsonStep.startWith,
 			_endWith: jsonStep.endWith,
 			_next: jsonStep.next,
-			_download: jsonStep.download,
+			_download: jsonStep.download || [],
 			_ignoreList: jsonStep.ignoreList,
 			_window: win,
 			_script: '',
@@ -22,20 +23,27 @@ class Step {
 			_scriptWaiting: true
 		});
 
+		this.log = log;
 
 		this._timeoutValue = jsonStep.timeout !== undefined ? jsonStep.timeout : 30000;
-		if (this._timeoutValue)
+		if (this._timeoutValue !== false && this._timeoutValue != 0)
 			this._timeout = setTimeout(_ => {
 				this._timedOut()
 			}, this._timeoutValue)
 	}
 
 	//
+	// GETTER/SETTER
+	//
+
+	get downloadInfo() { return this._download }
+
+	//
 	// PRIVATE FUNCTIONS
 	//
 
 	_timedOut() {
-		this.error("Step timed out after - "+this._timeoutValue+'ms');
+		this.error(new StepError("Step timed out after - "+this._timeoutValue+'ms'));
 	}
 
 	* _stepActionsIterator() {
@@ -50,10 +58,15 @@ class Step {
 		}
 
 		// Execute script/download
-		if (this._snippet)
-			this._executeScript();
-		if (this._download)
-			this._window.webContents.downloadURL(this._download.url);
+		if (this._snippet) {
+			if (this._domReady) {
+				this._scriptWaiting = false;
+				this._executeScript()
+			}
+			// Dom is not ready, register that script should be executed when dom becomes ready
+			else
+				this._scriptWaiting = true;
+		}
 
 		// Wait for ending url
 		if (this._endWith && this._endWith.url) {
@@ -80,22 +93,13 @@ class Step {
 	execute() {
 		// Create iterator object from generator function
 		this._urlAction = this._stepActionsIterator();
+
 		// Move iterator to starting position
 		this._urlAction.next();
 
 		// Trigger execution with starting url if provided
 		if (this._startWith && this._startWith.url && this._window)
 			this._window.webContents.loadURL(this._startWith.url);
-	}
-
-	success() {
-		clearTimeout(this._timeout);
-		this._success(this._sessionData);
-	}
-
-	error(error) {
-		clearTimeout(this._timeout);
-		this._error(error);
 	}
 
 	inputUrl(details) {
@@ -106,37 +110,29 @@ class Step {
 			if (this._endWith && (value == true && done == true))
 				this.success();
 		} catch(error) {
-			this.error(error);
+			this.error(new StepError(error));
 		}
 	}
 
-	downloadState(state) {
-		this._download.state = state;
-		if (!this._endWith) {
-			if (state == 'success')
-				this.success();
-			else if (state == 'error')
-				this.error(`File ${this._download.name} failed with state ${state}`);
-		}
+	success() {
+		clearTimeout(this._timeout);
+		this._resolveStep(this._sessionData);
+	}
+
+	error(err) {
+		clearTimeout(this._timeout);
+		if (!(err instanceof SequenceError) && !(err instanceof ScriptError) && !(err instanceof ApiError))
+			err = new StepError(err);
+		this._rejectStep(err);
 	}
 
 	domReady(isReady) {
 		this._domReady = isReady;
-		if (this._domReady == true) {
-			// Start pending executions
-			if (this._scriptWaiting == true) {
-				this._scriptWaiting = false;
-				this._executeScript();
-			}
+		if (this._domReady === true && this._scriptWaiting == true) {
+			this._scriptWaiting = false;
+			this._executeScript();
 		}
 	}
-
-
-	//
-	// GETTER/SETTER
-	//
-
-	get downloadInfo() { return this._download }
 
 	//
 	// VIRTUAL FUNCTIONS

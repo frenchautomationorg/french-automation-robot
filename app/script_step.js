@@ -1,33 +1,30 @@
 const Step = require('./step');
 const lineReader = require('readline');
 const fs = require('fs-extra');
+const { ScriptError, StepError } = require('./errors');
 
 let CONSOLE_ERROR;
 let PREPENDED_LINES = 0;
 
 class ScriptStep extends Step {
-	constructor(stepResolve, stepReject, jsonStep, win, sequenceUtils, isDomReady = false) {
-		super(stepResolve, stepReject, jsonStep, win, isDomReady);
-		this.sequenceUtils = sequenceUtils;
-
-		CONSOLE_ERROR = undefined;
+	constructor({resolveStep, rejectStep, jsonStep, win, utils, log, isDomReady = false}) {
+		super(resolveStep, rejectStep, jsonStep, win, log, isDomReady);
+		this.utils = utils;
 	}
 
 	//
 	// PRIVATE FUNCTIONS
 	//
 	consoleMessage(event, level, message, line, sourceId) {
+		// Called by webContents console-message event
+		// `this` isn't the class context but the callback function
+		// Use global variables
 		if (level === 3)
-			CONSOLE_ERROR = `${message} - line:${line - PREPENDED_LINES}`.replace(/^Uncaught /, '');
+			CONSOLE_ERROR = `${message}\n\tline:${line - PREPENDED_LINES}`.replace(/^Uncaught /, '');
 	}
 
 	_executeScript() {
-		// Dom is not ready, register that script should be executed when dom becomes ready
-		if (!this._domReady) {
-			this._scriptWaiting = true;
-			return;
-		}
-		this._scriptWaiting = false;
+		CONSOLE_ERROR = undefined;
 
         this._window.webContents.removeListener('console-message', this.consoleMessage);
         this._window.webContents.on('console-message', this.consoleMessage);
@@ -42,7 +39,7 @@ class ScriptStep extends Step {
 			        	this._sessionData = {...this._sessionData, ...scriptData};
 		        	}
 		        	catch(e) {
-		        		console.error("WARN: Couldn't parse webContents.executeJavaScript() scriptData\n"+JSON.stringify(e, null, 4));
+		        		this.log("WARN: Couldn't parse webContents.executeJavaScript() scriptData\n"+JSON.stringify(e, null, 4));
 		        	}
 		        }
 		        else
@@ -51,10 +48,9 @@ class ScriptStep extends Step {
 
         	if (!this._endWith)
         		this.success();
-        }).catch(error => {
-        	if (CONSOLE_ERROR)
-        		error = CONSOLE_ERROR;
-    		this.error(error);
+        }).catch(err => {
+    		err = new ScriptError(CONSOLE_ERROR || err || "Unknown error while executing script");
+    		this.error(err);
         });
     }
 
@@ -64,57 +60,46 @@ class ScriptStep extends Step {
 	//
 
 	async init(environmentVars) {
-		await new Promise((resolve, reject) => {
+		try {
 			// No script file
 			if (!this._snippet)
-				return resolve();
+				return;
+
 			const snippetFile = `${__dirname}/../exec/program/${this._snippet}`;
 
 			if (!fs.existsSync(snippetFile))
-				return reject(`Couldn't find snippet file ${snippetFile}`);
+				throw new Error(`Couldn't find snippet file ${snippetFile}`);
 
             // Read script file
-            const instructions = lineReader.createInterface({
-                input: fs.createReadStream(snippetFile)
-            });
-            const lines = [];
+            let script = fs.readFileSync(snippetFile, 'utf8');
             // Replace environment variables
-            instructions.on('line', inputLine => {
-	            const regex = new RegExp(/{ENV\|([^}]*)}/g);
-	            let line = inputLine, matches = null;
-	            if (environmentVars)
-		            while ((matches = regex.exec(inputLine)) != null)
-		            	if (environmentVars[matches[1]])
-		                	line = line.replace(matches[0], environmentVars[matches[1]]);
+            let matches = null;
+            const regex = new RegExp(/{ENV\|([^}]*)}/g);
+            if (environmentVars)
+	            while ((matches = regex.exec(script)) != null)
+	            	if (environmentVars[matches[1]])
+	                	script = script.replace(matches[0], environmentVars[matches[1]]);
 
-	            lines.push(line);
-            }).on('close', _ => {
-            	let script = lines.join('\n');
+        	// Prepend sessionData and env to script
+        	this._script = '';
+        	try {
+        		this._script += `sessionData = ${JSON.stringify(this.utils.sessionData, null, 4)};\n`;
+        	} catch(err) {
+        		this.log("WARN: Couldn't prepend sessionData to script");
+        	}
+        	try {
+        		this._script += `env = ${JSON.stringify(this.utils.env, null, 4)};\n`;
+        	} catch(err) {
+        		this.log("WARN: Couldn't prepend env to script");
+        	}
+        	// Save prepended line count to fix error line message
+        	PREPENDED_LINES = this._script.split('\n').length+1;
 
-            	let sessionDataStr, envStr;
-            	try {
-            		sessionDataStr = JSON.stringify(this.sequenceUtils.sessionData, null, 4);
-            	} catch(err) {
-            		console.error("Couldn't prepend sessionData to script");
-            	}
-            	try {
-            		envStr = JSON.stringify(this.sequenceUtils.env, null, 4);
-            	} catch(err) {
-            		console.error("Couldn't prepend env to script");
-            	}
+    		this._script += script;
 
-            	this._script = '';
-            	if (sessionDataStr)
-            		this._script += `sessionData = ${sessionDataStr};\n`;
-            	if (envStr)
-            		this._script += `env = ${envStr};\n`;
-            	PREPENDED_LINES = this._script.split('\n').length+1;
-
-        		this._script += script;
-
-            	resolve();
-            }).on('error', reject);
-		});
+		} catch(err) {
+			this.error(new ScriptError(err));
+		}
 	}
 }
 

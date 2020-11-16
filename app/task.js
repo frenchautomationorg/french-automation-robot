@@ -6,6 +6,8 @@ const moment = require('moment');
 const ScriptStep = require('./script_step');
 const SequenceStep = require('./sequence_step');
 
+const { TaskError } = require('./errors');
+
 //const robotjs = require('robotjs');
 
 class Task {
@@ -15,12 +17,11 @@ class Task {
 		this._executionId = task.id_execution;
 		this._state = task.r_state.id;
 		this._env = task.f_data_flow;
-		this._filesToDownload = [];
 		this._robot = robot;
-		this._window = robot.window;
 		this._sessionData = {};
 		this._loggedOut = false;
 		this._domReady = false;
+		this._downloads = [];
 
 		this._logFolder = `${__dirname}/../logs/${moment().format('DDMMYYYY')}`;
 		this._logFilePath = `${this._logFolder}/${new Date().getTime()}_task_${task.id}_log.txt`;
@@ -72,28 +73,24 @@ class Task {
 	get id() {return this._id}
 	get executionId() {return this._executionId}
 	get robotId() {return this._robot.id}
-	get window() {return this._robot.window}
+	get window() {return this._robot._window}
 	get state() {return this._state}
 	set state(newState) {this._state = newState}
 	get logFilePath() {return this._logFilePath}
 
 	set executionId(id) { this._executionId = id}
+	set window(win) { this._window = win}
 
-	get sequenceUtils() {
+	get snippetUtils() {
 		return {
-    		"window": this._robot.window,
+    		"window": this.window,
     		"robotId": this.robotId,
-    		"taskId": this._id,
+    		"taskId": this.id,
     		"env": this._env,
     		"sessionData": this._sessionData,
     		"api": api,
-    		"waitDownloads": _ => {
-    			return new Promise((downloadsDone, downloadsError) => {
-			    	let waitDownloadPromise = new Promise((resolve, reject) => {
-			        	this.waitForDownloads(resolve, reject);
-			    	});
-			    	waitDownloadPromise.then(downloadsDone).catch(downloadsError);
-    			});
+    		"waitDownloads": async _ => {
+    			await Promise.allSettled(this._downloads.map(download => download.promise));
     		}
     	}
 	}
@@ -151,7 +148,6 @@ class Task {
 						stream: fs.createReadStream(this._logFilePath)
 					});
 					// fs.unlinkSync(this._logFilePath);
-
 				} catch(err) {
 					console.error("Couldn't send error file "+this._logFilePath);
 					console.error(err);
@@ -169,7 +165,7 @@ class Task {
 			// Download zip file
 			let result = await api.call({url: '/api/task/'+this._id+'/downloadProgram', encoding: null});
 			if (result.response.statusCode == 404)
-				throw new Error("Task doesn't have a program file");
+				throw new TaskError("Task doesn't have a program file");
 			fs.writeFileSync('./program_zip.zip', result.body);
 
 			// Clear previous task program files
@@ -191,11 +187,11 @@ class Task {
 			// Parse env
 			try {
 				this._env = this._env && this._env != '' ? JSON.parse(this._env) : {};
-			} catch (error) {throw new Error("Task f_data_flow couldn't be parsed\n"+JSON.stringify(error, null, 4));}
+			} catch (error) {throw new TaskError("Task f_data_flow couldn't be parsed\n"+JSON.stringify(error, null, 4));}
 			// Parse steps
 			try {
 				this._config = JSON.parse(fs.readFileSync(`${__dirname}/../exec/program/config.json`))
-			} catch (error) {throw new Error("Task config.json couldn't be parsed\n"+JSON.stringify(error, null, 4));}
+			} catch (error) {throw new TaskError("Task config.json couldn't be parsed\n"+JSON.stringify(error, null, 4));}
 
 		} catch (error) {
 			this.log(`\tFAILED\n`);
@@ -229,23 +225,25 @@ class Task {
 			const stepPromise = new Promise((resolveStep, rejectStep) => {
 				const stepDelay = jsonStep.delay || 0;
 
-				setTimeout(_ => {
+				setTimeout(async _ => {
 			        this.log(`Executing ${isErrorStep ? "onError step" : "step"} ${jsonStep.name || stepIdx+1}:`);
 			        this.log(JSON.stringify(jsonStep, null, 4));
 
-			        // Provide promise resolve/reject to step so it can and task process at any time
-			        const stepParams = [resolveStep, rejectStep, jsonStep, this.window, this.sequenceUtils, this._domReady];
+			        if (jsonStep.name == 'sequence') {
+			        	this.window.webContents.downloadURL('http://127.0.0.1:1337/default/download?entity=e_execution&f=20201116-105812_1605520660173_task_2_log.txt');
+			        }
+			        // Provide promise resolve/reject to step so it can end task process at any time
+			        const stepParams = {resolveStep, rejectStep, jsonStep, win: this.window, utils: this.snippetUtils, isDomReady: this._domReady};
 					// Create step
 					if (jsonStep.type == 'action')
-						this._step = new ScriptStep(...stepParams);
+						this._step = new ScriptStep(stepParams);
 					else if (jsonStep.type == 'sequence')
-						this._step = new SequenceStep(...stepParams);
+						this._step = new SequenceStep(stepParams);
 
 					// Initialize and execute step
-					this._step.init(this._env).then(_ => {
-						this._step.execute();
-					})
-					.catch(rejectStep);
+					await this._step.init(this._env);
+					// execute() can't be awaited because it depends on step's resolveStep/rejectStep
+					this._step.execute();
 				}, stepDelay);
 			});
 
@@ -371,7 +369,7 @@ class Task {
 
 	inputUrl(details) {
     	if (!this._step)
-    		return log("Got url input while no step processing : "+details.url);
+    		return this.log("Got url input while no step processing : "+details.url);
 
     	// Assets loading, dismiss
     	if (details.url.toLowerCase().match(/.*\.(css|js|png|jpg|jpeg|woff)$/) != null)
@@ -383,26 +381,51 @@ class Task {
     	this._step.inputUrl(details);
 	}
 
-	willDownload() {
+	willDownload(fileItem) {
 		if (!this._step) {
 			this.log("Trying to download file but there is no step processing");
 			return;
 		}
-		if (!(this._downloading = this._step.downloadInfo)) {
-			this.log("Trying to download file but step haven't any download configured")
-			return;
-		}
+		console.log("Task.willDownload()");
+		const fileName = this._step.downloadInfo[this._downloads.length-1]
+							? this._step.downloadInfo[this._downloads.length-1]
+							: /*(this._downloads.length+1)+'_'+*/fileItem.getFilename();
+		const filePath = `./exec/program/download/${fileName}`;
+		const download = {
+			state: 'starting',
+			fileName,
+			filePath
+		};
 
-		this._downloading.state = 'pending';
+        fileItem.setSavePath(download.filePath);
+		console.log(fileItem.getSavePath());
 
-		return this._downloading.name;
-	}
+        download.promise = new Promise((resolve, reject) => {
+	        fileItem.on('updated', (event, state) => {
+	        	console.log('UPDATED - '+state);
+	        	download.state = 'pending';
+	            if (state === 'interrupted') {
+	            	download.state = 'interrupted';
+	            }
+	            else if (state === 'progressing')
+					download.state = fileItem.isPaused() ? 'paused' : 'progressing';
+	        });
+	        fileItem.once('done', (event, state) => {
+	        	console.log("DONE");
+	            if (state === 'completed') {
+	            	this.log(`Download SUCESS for file ${fileName}`)
+	            	download.state = 'success';
+	            	resolve();
+	            }
+	            else {
+	            	this.log(`Download FAILED for file ${fileName} - ${state}`)
+	            	download.state = 'error';
+	            	reject();
+	            }
+	        });
+        });
 
-	downloadState(fileName, state) {
-		this.log(`${fileName} - ${state}`);
-		if (!this._step)
-			return;
-		this._step.downloadState(state);
+        this._downloads = download;
 	}
 
 	domReady(isReady = true) {
