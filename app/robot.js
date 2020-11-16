@@ -90,27 +90,7 @@ class Robot {
 	    this.window.webContents.session.on('will-download', (event, item, webContents) => {
 	    	if (!this._task)
 	    		return;
-		  item.setSavePath('/tmp/'+item.getFilename());
-
-		  item.on('updated', (event, state) => {
-		    if (state === 'interrupted') {
-		      console.log('Le téléchargement est interrompu mais peut être redémarrer')
-		    } else if (state === 'progressing') {
-		      if (item.isPaused()) {
-		        console.log('Le téléchargement est en pause')
-		      } else {
-		        console.log(`Received bytes: ${item.getReceivedBytes()}`)
-		      }
-		    }
-		  })
-		  item.once('done', (event, state) => {
-		    if (state === 'completed') {
-		      console.log('Téléchargement réussi')
-		    } else {
-		      console.log(`Téléchargement échoué : ${state}`)
-		    }
-		  })
-	    	// this._task.willDownload(item);
+	    	this._task.willDownload(item);
 	    });
 
 	    this.window.on('closed', _ => {

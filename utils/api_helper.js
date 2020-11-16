@@ -91,10 +91,8 @@ module.exports = {
 	},
 	upload: function(callOptions) {
 		return new Promise(function(resolve,reject) {
-			if (!credentials) {
-				console.error("Can't make API call. No credentials defined");
-				return reject();
-			}
+			if (!credentials)
+				return reject(new ApiError("Can't make API call. No credentials defined"));
 
 			// Merge default and provided options
 			for (var defaultOpt in defaultOptions)
@@ -104,7 +102,7 @@ module.exports = {
 			if (!callOptions.method)
 				callOptions.method = 'get';
 			if (!callOptions.url)
-				return reject("No URL for API call");
+				return reject(new ApiError("No URL for API call"));
 
 			callOptions.originUrl = callOptions.url;
 			// Add bearer token to url
@@ -113,7 +111,7 @@ module.exports = {
 							credentials.back_host + callOptions.originUrl + '?token='+BEARER_TOKEN;
 			var apiReq = request[callOptions.method](callOptions, function(err, resp, body) {
 				if (err)
-					return reject(err);
+					return reject(new ApiError(err));
 				return resolve();
 			});
 			var apiForm = apiReq.form();
@@ -122,10 +120,8 @@ module.exports = {
 	},
 	map: function (myEntity, myField, myValue, myTargetField) {
 		return new Promise(function(resolve, reject) {
-			if (!credentials) {
-				console.error("Can't make API call. No credentials defined");
-				return reject();
-			}
+			if (!credentials)
+				return reject(new ApiError("Can't make API call. No credentials defined"));
 
 			let callOptions = {};
 
@@ -141,7 +137,7 @@ module.exports = {
 			if (!callOptions.method)
 				callOptions.method = 'get';
 			if (!callOptions.url)
-				return reject("No URL for API call");
+				return reject(new ApiError("No URL for API call"));
 
 			callOptions.originUrl = callOptions.url;
 
@@ -157,8 +153,7 @@ module.exports = {
 				}
 			})
 			.catch(function(error) {
-				console.error(error);
-				reject(error);
+				reject(new ApiError(error));
 			});
 		});
 	},
