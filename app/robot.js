@@ -4,11 +4,13 @@ const electron = require('electron');
 const BrowserWindow = electron.BrowserWindow;
 
 const Task = require('./task');
+const { CustomError } = require('./errors');
 
 class Robot {
 	constructor() {
 		this._task = null;
 		this._browserInitialized = false;
+		this._sessionSet = false;
 	}
 
 	//
@@ -41,7 +43,7 @@ class Robot {
 	_initBrowser() {
 		if (this._browserInitialized == true)
 			return;
-
+		var self = this;
 	    // Window initialization
 	    this.window = new BrowserWindow({
 	    	width: 1000,
@@ -87,18 +89,17 @@ class Robot {
         	this._task.domReady(true);
         });
 
-	    this.window.webContents.session.on('will-download', (event, item, webContents) => {
-	    	if (!this._task)
-	    		return;
-	    	this._task.willDownload(item);
-	    });
+        if (!this._sessionSet) {
+		    this.window.webContents.session.on('will-download', (event, item, webContents) => {
+		    	if (!this._task)
+		    		return;
+		    	this._task.willDownload(item);
+		    });
+		    this._sessionSet = true;
+		}
 
 	    this.window.on('closed', _ => {
-	        this._browserInitialized = false;
-	        this.window = null;
-
-	        if (this._task)
-	        	this._task.failed("Window closed during process");
+	    	this.stop();
 	    });
 
         this.window.maximize();
@@ -106,14 +107,17 @@ class Robot {
 	    this._browserInitialized = true;
 	}
 
-	_end() {
-		// Manualy delete task to ensure that garbage collector resets any unfinished promise/timeout
-		delete this._task;
+	_end(err) {
+		if (this._task) {
+			this._task.stop(err);
+			// Manualy delete task to ensure that garbage collector resets any unfinished promise/timeout
+			delete this._task;
+		}
 
 		// Destroy window to reset current page and session
 		if (this.window) {
 			this.window.destroy();
-			delete this._window;
+			delete this.window;
 			this._browserInitialized = false;
 		}
 	}
@@ -156,7 +160,7 @@ class Robot {
 	}
 
 	stop() {
-		this._end();
+		this._end(new CustomError("WindowClosedDuringProcess"));
 	}
 }
 

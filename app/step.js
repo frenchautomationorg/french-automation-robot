@@ -15,7 +15,7 @@ class Step {
 			_startWith: jsonStep.startWith,
 			_endWith: jsonStep.endWith,
 			_next: jsonStep.next,
-			_download: jsonStep.download || [],
+			_download: jsonStep.download,
 			_ignoreList: jsonStep.ignoreList,
 			_window: win,
 			_script: '',
@@ -36,7 +36,9 @@ class Step {
 	// GETTER/SETTER
 	//
 
-	get downloadInfo() { return this._download }
+	get download() {
+		return this._download;
+	}
 
 	//
 	// PRIVATE FUNCTIONS
@@ -66,6 +68,13 @@ class Step {
 			// Dom is not ready, register that script should be executed when dom becomes ready
 			else
 				this._scriptWaiting = true;
+		}
+
+		if (this.download) {
+			if (!this.download.url || this.download.url == "")
+				this.log("WARN: No URL provided for download")
+			else
+				this._window.webContents.downloadURL(this.download.url);
 		}
 
 		// Wait for ending url

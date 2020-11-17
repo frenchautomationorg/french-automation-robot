@@ -24,34 +24,38 @@ class ScriptStep extends Step {
 	}
 
 	_executeScript() {
-		CONSOLE_ERROR = undefined;
+		try {
+			CONSOLE_ERROR = undefined;
 
-        this._window.webContents.removeListener('console-message', this.consoleMessage);
-        this._window.webContents.on('console-message', this.consoleMessage);
+	        this._window.webContents.removeListener('console-message', this.consoleMessage);
+	        this._window.webContents.on('console-message', this.consoleMessage);
 
-        // Execute step script
-        this._window.webContents.executeJavaScript(this._script, true).then(scriptData => {
-        	if (scriptData) {
-        		if (typeof scriptData === 'string') {
-		        	try {
-		        		scriptData = JSON.parse(scriptData);
-			        	// Merge scriptData with Step sessionData
+	        // Execute step script
+	        this._window.webContents.executeJavaScript(this._script, true).then(scriptData => {
+	        	if (scriptData) {
+	        		if (typeof scriptData === 'string') {
+			        	try {
+			        		scriptData = JSON.parse(scriptData);
+				        	// Merge scriptData with Step sessionData
+				        	this._sessionData = {...this._sessionData, ...scriptData};
+			        	}
+			        	catch(e) {
+			        		this.log("WARN: Couldn't parse webContents.executeJavaScript() scriptData\n"+JSON.stringify(e, null, 4));
+			        	}
+			        }
+			        else
 			        	this._sessionData = {...this._sessionData, ...scriptData};
-		        	}
-		        	catch(e) {
-		        		this.log("WARN: Couldn't parse webContents.executeJavaScript() scriptData\n"+JSON.stringify(e, null, 4));
-		        	}
 		        }
-		        else
-		        	this._sessionData = {...this._sessionData, ...scriptData};
-	        }
 
-        	if (!this._endWith)
-        		this.success();
-        }).catch(err => {
-    		err = new ScriptError(CONSOLE_ERROR || err || "Unknown error while executing script");
-    		this.error(err);
-        });
+	        	if (!this._endWith)
+	        		this.success();
+	        }).catch(err => {
+	    		err = new ScriptError(CONSOLE_ERROR || err || "Unknown error while executing script");
+	    		this.error(err);
+	        });
+   	    } catch(err) {
+	    	;
+	    }
     }
 
 
