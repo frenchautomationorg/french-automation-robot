@@ -91,7 +91,7 @@ class Task {
     		sessionData: this._sessionData,
     		api: api,
     		error: code => {
-    			return new CustomError(code);
+    			throw new CustomError(code);
     		},
     		download: url => {
     			this.window.webContents.downloadURL(url);

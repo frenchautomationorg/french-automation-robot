@@ -143,8 +143,6 @@ module.exports = {
 
 			call(callOptions, 0)
 			.then(function (data) {
-
-				console.log(JSON.stringify(data));
 				if (!data) {
 					resolve();
 				}

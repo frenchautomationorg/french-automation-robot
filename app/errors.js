@@ -42,11 +42,12 @@ exports.SequenceError = class SequenceError extends AutomationError {
     constructor(error) {
         super(error)
         this.name = this.constructor.name
-        Error.captureStackTrace(this, SequenceError)
+        // Error.captureStackTrace(this, SequenceError)
         if (error.stack)
             this.stack = error.stack;
-        if (error.code)
+        if (error.code) {
             this.code = error.code;
+        }
     }
 }
 
