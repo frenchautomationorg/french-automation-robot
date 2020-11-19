@@ -2,14 +2,12 @@ node_modules/*
 *.log
 logs/*
 upload/*
-config/access.json
-config/global.js
 package-lock.json
 /nbproject/private/
 api_test.js
 files/*
 vision*
 download/*
-credentials.json
+config/*
 *node_modules*
 exec/

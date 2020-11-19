@@ -1,10 +1,10 @@
-
 class AutomationError extends Error {
     constructor(error) {
         super(error)
         this.code = error && error.code || this.constructor.name;
     }
 }
+exports.AutomationError = AutomationError;
 
 exports.RobotError = class RobotError extends AutomationError {
     constructor(error) {

@@ -348,6 +348,7 @@ class Task {
 
 	    	if (Object.keys(this._sessionData).length)
 	    		this.log(JSON.stringify(this._sessionData, null, 4));
+
 			this._state = Task.DONE;
 			// Update Task status
 			await api.call({
@@ -427,7 +428,7 @@ class Task {
 			this.log("WARN: Trying to download file but there is no step processing");
 		else if (this._step.download && this._step.download.filename)
 			fileName = this._step.download.filename;
-		else
+		if (!fileName)
 			fileName = fileItem.getFilename();
 
 		const filePath = path.resolve(`${__dirname}/../exec/downloads/${fileName}`);
@@ -442,9 +443,8 @@ class Task {
         download.promise = new Promise((resolve, reject) => {
 	        fileItem.on('updated', (event, state) => {
 	        	download.state = 'pending';
-	            if (state === 'interrupted') {
+	            if (state === 'interrupted')
 	            	download.state = 'interrupted';
-	            }
 	            else if (state === 'progressing')
 					download.state = fileItem.isPaused() ? 'paused' : 'progressing';
 	        });

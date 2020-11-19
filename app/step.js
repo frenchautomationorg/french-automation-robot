@@ -1,4 +1,4 @@
-const { ApiError, StepError, ScriptError, SequenceError } = require('./errors');
+const { ApiError, StepError, ScriptError, SequenceError, AutomationError } = require('./errors');
 
 class Step {
 	constructor(resolveStep, rejectStep, jsonStep, win, log, isDomReady) {
@@ -59,7 +59,7 @@ class Step {
 			}
 		}
 
-		// Execute script/download
+		// Execute script
 		if (this._snippet) {
 			if (this._domReady) {
 				this._scriptWaiting = false;
@@ -69,7 +69,7 @@ class Step {
 			else
 				this._scriptWaiting = true;
 		}
-
+		// Trigger download
 		if (this.download) {
 			if (!this.download.url || this.download.url == "")
 				this.log("WARN: No URL provided for download")
@@ -130,7 +130,7 @@ class Step {
 
 	error(err) {
 		clearTimeout(this._timeout);
-		if (!(err instanceof SequenceError) && !(err instanceof ScriptError) && !(err instanceof ApiError))
+		if (!(err instanceof AutomationError))
 			err = new StepError(err);
 		this._rejectStep(err);
 	}
@@ -148,7 +148,11 @@ class Step {
 	//
 
 	async init() {
-		console.error("Error: Step children must implement init() function");
+		console.error("WARN: Virtual function Step.init called");
+	}
+
+	async _executeScript() {
+		console.error("WARN: Virtual function Step._executeScript called");
 	}
 }
 
