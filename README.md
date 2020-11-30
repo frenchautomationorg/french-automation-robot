@@ -24,8 +24,10 @@ French Automation is an Open Source RPA / RDA software suite based on :
 <pre><code>git clone git@github.com:frenchautomationorg/french-automation-robot.git</code></pre>
 
 <p>Install modules and run application logged as "root" :</p>
-<pre><code>npm install<br>
-npm start</code></pre>
+<pre><code>sudo npm install -g electron --unsafe-perm=true --allow-root<br/>
+sudo npm i<br/>
+sudo npm i electron-rebuild --save<br/>
+sudo ./node_modules/.bin/electron-rebuild</code></pre>
 
 <br/>
 
