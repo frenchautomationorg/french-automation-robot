@@ -194,6 +194,7 @@ The parameter `utils` sent to `execute(utils)` contains :
 <li>An index of a step from the steps array</li>
 <li>A step object</li>
 <li>An array of step objects</li>
+</ul>
 
 
 ## Contribute
