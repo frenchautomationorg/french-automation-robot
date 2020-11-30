@@ -247,6 +247,9 @@ class Task {
 			        this.log(`Executing ${isErrorStep ? "onError step" : "step"} ${jsonStep.name || stepIdx+1}:`);
 			        this.log(JSON.stringify(jsonStep, null, 4));
 
+					// If first step is a sequence, don't wait for domReady event to execute
+		        	if (stepIdx == 0 && jsonStep.type == 'sequence')
+		        		this._domReady = true;
 			        // Provide promise resolve/reject to step so it can end task process at any time
 			        const stepParams = {resolveStep, rejectStep, jsonStep, win: this.window, utils: this.snippetUtils, isDomReady: this._domReady};
 					// Create step
