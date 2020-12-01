@@ -24,8 +24,10 @@ French Automation is an Open Source RPA / RDA software suite based on :
 <pre><code>git clone git@github.com:frenchautomationorg/french-automation-robot.git</code></pre>
 
 <p>Install modules and run application logged as "root" :</p>
-<pre><code>npm install<br>
-npm start</code></pre>
+<pre><code>sudo npm install -g electron --unsafe-perm=true --allow-root<br/>
+sudo npm i<br/>
+sudo npm i electron-rebuild --save<br/>
+sudo ./node_modules/.bin/electron-rebuild</code></pre>
 
 <br/>
 
@@ -192,6 +194,8 @@ The parameter `utils` sent to `execute(utils)` contains :
 <li>An index of a step from the steps array</li>
 <li>A step object</li>
 <li>An array of step objects</li>
+</ul>
+
 
 ## Contribute
 We encourage you to contribute to French Automation software suite.
@@ -214,7 +218,7 @@ We encourage you to contribute to French Automation software suite.
   <li><a href="https://www.frenchautomation.com/default/rpa" target="_blank">Methodology</a></li>
   <li><a href="https://www.frenchautomation.com/default/overview" target="_blank">Architecture</a></li>
   <li><a href="https://www.frenchautomation.com/default/tutorial" target="_blank">Tutorial</a></li>
-  <li><a href="https://talk.frenchautomation.com/" target="_blank">Forum</a></li>
+  <li><a href="https://docs.frenchautomation.com/" target="_blank">Documentation</a></li>
 </ul>
 
 <br/>
