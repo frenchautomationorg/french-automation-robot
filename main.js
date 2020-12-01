@@ -28,7 +28,7 @@ function createWindow () {
         webPreferences: {
             nodeIntegration: true
         },
-        icon: './assets/img/new_logo_newmips.png'
+        icon: './assets/img/logo_fa.png'
     })
 
     // Open the DevTools.
