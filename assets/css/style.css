@@ -1,0 +1,33 @@
+
+
+.footer {
+	position: absolute;
+	bottom: 0;
+    width: 100%;
+    background-color: #0055a4;
+    background-image: url('../../assets/img/background2.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    height: auto;
+	/* height: 130px; */
+}
+
+.blue-line {
+	height: 4px;
+	background-color: #0055a4;
+}
+
+.red-line {
+	height: 4px;
+	background-color: #ee2436;
+}
+.white-line {
+	height: 4px;
+	background-color: #fff;
+}
+
+.footer-wrapper {
+	text-align: center;	
+	color: #fff;
+	padding: 2rem 0 1.5rem 0;
+}

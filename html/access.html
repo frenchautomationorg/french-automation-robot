@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../assets/css/style.css">
   </head>
   <body>
 
@@ -70,15 +71,27 @@
               <input class="form-control input" placeholder='' id="f_done" name="f_done" value="" type="number">
           </div>
       </div>
-
-      <div class="col-xs-10 col-xs-offset-1">
+      <div data-field="f_autostart" class="col-xs-5 col-xs-offset-1">
           <div class="form-group">
-              <button id="setConfig" class="btn btn-primary btn-lg"> Sauvegarder </button>
-              <button class="btn btn-default btn-lg" onclick="javascript:history.back();"> Annuler </button>
+              <label for="f_autostart"> Démarrage automatique </label>&nbsp;&nbsp;
+              <input class="input" id="f_autostart" name="f_autostart" value="" type="checkbox">
           </div>
       </div>
 
-    <div style="text-align: right; color: #fff; margin-top: 170px; padding-right: 15px;">French Automation IT &trade; - Version v1.0.0</div>
+      <div class="col-xs-10 col-xs-offset-1">
+          <div class="form-group">
+              <button id="setConfig" class="btn btn-primary"> Sauvegarder </button>
+              <button class="btn btn-default" onclick="javascript:history.back();"> Annuler </button>
+          </div>
+      </div>
+
+      <div class="footer">
+        <div class="red-line"></div>
+        <div class="white-line"></div>
+        <div class="blue-line"></div>
+        <div class="white-line"></div>
+        <div class="footer-wrapper">French Automation IT &trade; - Version v1.0.0</div>
+      </div>
     <script>
       window.jQuery = window.$ = require("../assets/js/jquery.min.js");
       const router = require('../assets/js/router.js');
@@ -97,6 +110,7 @@
           idProcessing: document.getElementById('f_processing').value,
           idFailed: document.getElementById('f_failed').value,
           idDone: document.getElementById('f_done').value,
+          autoStart: document.getElementById('f_autostart').checked
         });
       });
 

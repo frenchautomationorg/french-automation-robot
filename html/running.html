@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
 
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+    <link rel="stylesheet" href="../assets/css/style.css">
   </head>
   <body>
     <script type="text/javascript">
@@ -25,13 +26,30 @@
         <img src="../assets/img/logo_fa.png" width="150px" style="padding-top:30px;" />
         <h2><b>Automate N°<span id="id"></span></b></h2><br>
         <span>En cours de traitement</span>
-        <div style="text-align: right; color: #fff; margin-top: 250px; padding-right: 15px;">French Automation IT &trade; - Version v1.0.0</div>
+        <br><br>
+        <button id="stopBtn" class="btn btn-lg btn-danger"><i class="fa fa-square"></i>&nbsp;&nbsp;
+          Arrêter les traitements
+        </button>
+
+        <div class="footer">
+          <div class="red-line"></div>
+          <div class="white-line"></div>
+          <div class="blue-line"></div>
+          <div class="white-line"></div>
+          <div class="footer-wrapper">French Automation IT &trade; - Version v1.0.0</div>
+        </div>
       </center>
     </div>
 
     <script>
       // You can also require other files to run in this process
       require('../utils/renderer.js')
+    </script>
+    <script type="text/javascript">
+      $("#stopBtn").click(function () {
+        router.send('stopBot')
+      });
+
     </script>
   </body>
 </html>

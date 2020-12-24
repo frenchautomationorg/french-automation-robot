@@ -34,6 +34,8 @@ function createWindow () {
     // Open the DevTools.
     // mainWindow.webContents.openDevTools()
 
+    mainWindow.maximize();
+
     // and load the ./html/index.html of the app.
     mainWindow.loadFile('./html/index.html')
 
@@ -110,6 +112,7 @@ ipcMain.on('synchronous-message', (event, arg) => {
                             idProcessing,
                             idFailed,
                             idDone,
+                            autoStart,
                         } = JSON.parse(rawConfig);
 
                         mainWindow.webContents.executeJavaScript(`
@@ -121,6 +124,7 @@ ipcMain.on('synchronous-message', (event, arg) => {
                             document.getElementById('f_done').value = '${idDone}';
                             document.getElementById('f_pending').value = '${idPending}';
                             document.getElementById('f_failed').value = '${idFailed}';
+                            document.getElementById('f_autostart').checked = ${autoStart};
                         `);
                     }
                 } catch(err) {
@@ -142,6 +146,17 @@ ipcMain.on('synchronous-message', (event, arg) => {
 
                 robot.run();
                 console.log("Robot running...");
+            break;
+
+
+            case 'stopBot':
+                robot.stop();
+                console.log("Robot stopping...");
+
+                mainWindow.loadFile('./html/index.html')
+                mainWindow.webContents.executeJavaScript(`document.getElementById("id").innerHTML = "${robot.id}";`);
+
+                
             break;
 
             case 'setConfig':

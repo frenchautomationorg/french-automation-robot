@@ -53,6 +53,7 @@ class Robot {
 	        minimizable: false,
 	        resizable: true,
 	        webPreferences: { nodeIntegration: false } })
+
 	    // this.window.openDevTools();
 
 	    // When request is complete, notify task so it can continue ongoing task processing
