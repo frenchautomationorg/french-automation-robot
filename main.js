@@ -46,6 +46,14 @@ function createWindow () {
     // Closing parent closes children
     robot.mainWindow = mainWindow;
 
+    // Autostart robot if configured
+    const rawConfig = fs.readFileSync('config/credentials.json');
+    if (rawConfig && rawConfig !== '') {
+        const { autoStart } = JSON.parse(rawConfig);
+        if (autoStart) mainWindow.webContents.executeJavaScript(`document.getElementById("launchBtn").click();`);
+    }
+
+
     // Emitted when the window is closed.
     mainWindow.on('closed', function () {
         // Dereference the window object, usually you would store windows
