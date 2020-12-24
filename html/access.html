@@ -18,80 +18,92 @@
   <body>
 
     <!-- All of the Node.js APIs are available in this renderer process. -->
-    <center>
-      <img src="../assets/img/logo_fa.png" width="150px" style="padding-top:30px;" />
-        <h2><b>Configurer la connexion</b></h2><br>
-    </center>
-      <div data-field="id" class="col-xs-10 col-xs-offset-1">
-          <div class="form-group">
-              <label for="f_server"> ID Robot </label>
-              <input class="form-control input" placeholder='' id="id" name="id" value="" type="text">
-          </div>
-      </div>
-      <div data-field="f_server" class="col-xs-10 col-xs-offset-1">
-          <div class="form-group">
-              <label for="f_server"> Serveur </label>
-              <input class="form-control input" placeholder='' id="f_server" name="f_server" value="" type="text">
-          </div>
-      </div>
-      <div data-field="f_key" class="col-xs-5 col-xs-offset-1">
-          <div class="form-group">
-              <label for="f_key"> Clé </label>
-              <input class="form-control input" placeholder='' id="f_key" name="f_key" value="" type="text">
-          </div>
-      </div>
-      <div data-field="f_secret" class="col-xs-5">
-          <div class="form-group">
-              <label for="f_secret"> Code secret </label>
-              <input class="form-control input" placeholder='' id="f_secret" name="f_secret" value="" type="password">
-          </div>
-      </div>
 
-      <div data-field="f_pending" class="col-xs-5 col-xs-offset-1">
-          <div class="form-group">
-              <label for="f_pending"> ID du status "Pending" </label>
-              <input class="form-control input" placeholder='' id="f_pending" name="f_processing" value="" type="number">
-          </div>
-      </div>
-      <div data-field="f_processing" class="col-xs-5">
-          <div class="form-group">
-              <label for="f_processing"> ID du status "Processing" </label>
-              <input class="form-control input" placeholder='' id="f_processing" name="f_processing" value="" type="number">
-          </div>
-      </div>
-      <div data-field="f_failed" class="col-xs-5 col-xs-offset-1">
-          <div class="form-group">
-              <label for="f_failed"> ID du status "Failed" </label>
-              <input class="form-control input" placeholder='' id="f_failed" name="f_failed" value="" type="number">
-          </div>
-      </div>
-      <div data-field="f_done" class="col-xs-5">
-          <div class="form-group">
-              <label for="f_done"> ID du status "Done" </label>
-              <input class="form-control input" placeholder='' id="f_done" name="f_done" value="" type="number">
-          </div>
-      </div>
-      <div data-field="f_autostart" class="col-xs-5 col-xs-offset-1">
-          <div class="form-group">
-              <label for="f_autostart"> Démarrage automatique </label>&nbsp;&nbsp;
-              <input class="input" id="f_autostart" name="f_autostart" value="" type="checkbox">
-          </div>
-      </div>
+    <div id="page-container">
+      <div id="content-wrap">
+        <div class="content">
+          <div class="row">
+              <div class="col-xs-12" style="padding-top: 60px;">
+                <center>
+                  <img src="../assets/img/logo_fa.png" width="150px" />
+                    <h2><b>Configurer la connexion</b></h2><br>
+                </center>
+              </div>
+              <div data-field="id" class="col-xs-10 col-xs-offset-1">
+                  <div class="form-group">
+                      <label for="f_server"> ID Robot </label>
+                      <input class="form-control input" placeholder='' id="id" name="id" value="" type="text">
+                  </div>
+              </div>
+              <div data-field="f_server" class="col-xs-10 col-xs-offset-1">
+                  <div class="form-group">
+                      <label for="f_server"> Serveur </label>
+                      <input class="form-control input" placeholder='' id="f_server" name="f_server" value="" type="text">
+                  </div>
+              </div>
+              <div data-field="f_key" class="col-xs-5 col-xs-offset-1">
+                  <div class="form-group">
+                      <label for="f_key"> Clé </label>
+                      <input class="form-control input" placeholder='' id="f_key" name="f_key" value="" type="text">
+                  </div>
+              </div>
+              <div data-field="f_secret" class="col-xs-5">
+                  <div class="form-group">
+                      <label for="f_secret"> Code secret </label>
+                      <input class="form-control input" placeholder='' id="f_secret" name="f_secret" value="" type="password">
+                  </div>
+              </div>
 
-      <div class="col-xs-10 col-xs-offset-1">
-          <div class="form-group">
-              <button id="setConfig" class="btn btn-primary"> Sauvegarder </button>
-              <button id="cancelConfig" class="btn btn-default"> Annuler </button>
+              <div data-field="f_pending" class="col-xs-5 col-xs-offset-1">
+                  <div class="form-group">
+                      <label for="f_pending"> ID du status "Pending" </label>
+                      <input class="form-control input" placeholder='' id="f_pending" name="f_processing" value="" type="number">
+                  </div>
+              </div>
+              <div data-field="f_processing" class="col-xs-5">
+                  <div class="form-group">
+                      <label for="f_processing"> ID du status "Processing" </label>
+                      <input class="form-control input" placeholder='' id="f_processing" name="f_processing" value="" type="number">
+                  </div>
+              </div>
+              <div data-field="f_failed" class="col-xs-5 col-xs-offset-1">
+                  <div class="form-group">
+                      <label for="f_failed"> ID du status "Failed" </label>
+                      <input class="form-control input" placeholder='' id="f_failed" name="f_failed" value="" type="number">
+                  </div>
+              </div>
+              <div data-field="f_done" class="col-xs-5">
+                  <div class="form-group">
+                      <label for="f_done"> ID du status "Done" </label>
+                      <input class="form-control input" placeholder='' id="f_done" name="f_done" value="" type="number">
+                  </div>
+              </div>
+              <div data-field="f_autostart" class="col-xs-5 col-xs-offset-1">
+                  <div class="form-group">
+                      <label for="f_autostart"> Démarrage automatique </label>&nbsp;&nbsp;
+                      <input class="input" id="f_autostart" name="f_autostart" value="" type="checkbox">
+                  </div>
+              </div>
+
+              <div class="col-xs-10 col-xs-offset-1">
+                  <div class="form-group">
+                      <button id="setConfig" class="btn btn-primary"> Sauvegarder </button>
+                      <button id="cancelConfig" class="btn btn-default"> Annuler </button>
+                  </div>
+              </div>
+            </div>
           </div>
       </div>
-
-      <div class="footer">
-        <div class="red-line"></div>
-        <div class="white-line"></div>
-        <div class="blue-line"></div>
-        <div class="white-line"></div>
-        <div class="footer-wrapper">French Automation IT &trade; - Version v1.0.0</div>
-      </div>
+      <footer id="footer">
+          <div class="red-line"></div>
+          <div class="white-line"></div>
+          <div class="blue-line"></div>
+          <div class="white-line"></div>
+          <div class="footer-wrapper">
+            <span>French Automation IT &trade; - Version v1.0.0</span>
+          </div>
+      </footer>
+    </div>
     <script>
       window.jQuery = window.$ = require("../assets/js/jquery.min.js");
       const router = require('../assets/js/router.js');
