@@ -30,6 +30,9 @@ sudo npm i electron-rebuild --save<br/>
 sudo ./node_modules/.bin/electron-rebuild</code></pre>
 
 <br/>
+<br/>
+Note. once installed, you can declare French Automation Robot as a windows service. Simply execute:
+<pre><code>node install-windows-service.js</code></pre>
 
 
 ## Usage
