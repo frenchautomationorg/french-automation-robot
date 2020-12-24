@@ -176,7 +176,12 @@ ipcMain.on('synchronous-message', (event, arg) => {
 
                 // Reload api credentials
                 api.credentials(true);
-                mainWindow.loadFile('./html/index.html')
+                mainWindow.loadFile('./html/index.html');
+            break;
+
+            case 'cancelConfig':
+                mainWindow.loadFile('./html/index.html');
+                mainWindow.webContents.executeJavaScript(`document.getElementById("id").innerHTML = "${arg.id}";`);
             break;
         }
     }

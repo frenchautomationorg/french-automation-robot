@@ -81,7 +81,7 @@
       <div class="col-xs-10 col-xs-offset-1">
           <div class="form-group">
               <button id="setConfig" class="btn btn-primary"> Sauvegarder </button>
-              <button class="btn btn-default" onclick="javascript:history.back();"> Annuler </button>
+              <button id="cancelConfig" class="btn btn-default"> Annuler </button>
           </div>
       </div>
 
@@ -112,6 +112,10 @@
           idDone: document.getElementById('f_done').value,
           autoStart: document.getElementById('f_autostart').checked
         });
+      });
+
+      $("#cancelConfig").click(function () {
+        router.send('cancelConfig', {id: document.getElementById('id').value});
       });
 
     </script>
