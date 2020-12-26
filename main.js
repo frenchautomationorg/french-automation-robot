@@ -46,13 +46,16 @@ function createWindow () {
     // Closing parent closes children
     robot.mainWindow = mainWindow;
 
+    console.log(app.getPath("appData"));
+
     // Check if config file exists
-    if (!fs.existsSync(__dirname + '/config/credentials.json')) {
-        fs.copyFileSync(__dirname + '/config/credentials.json.template', __dirname + '/config/credentials.json');
+    if (!fs.existsSync(app.getPath("appData") + '/french-automation-robot/config/credentials.json')) {
+        fs.mkdirSync(app.getPath("appData") + '/french-automation-robot/config', {recursive: true});
+        fs.copyFileSync(__dirname + '/config/credentials.json.template',app.getPath("appData") + '/french-automation-robot/config/credentials.json');
     }
     else {
         // Autostart robot if configured
-        const rawConfig = fs.readFileSync(__dirname + '/config/credentials.json');
+        const rawConfig = fs.readFileSync(app.getPath("appData") + '/french-automation-robot/config/credentials.json');
         if (rawConfig && rawConfig !== '') {
             const { autoStart } = JSON.parse(rawConfig);
             if (autoStart) mainWindow.webContents.executeJavaScript(`document.getElementById("launchBtn").click();`);
@@ -116,7 +119,7 @@ ipcMain.on('synchronous-message', (event, arg) => {
             case 'access':
                 mainWindow.loadFile(__dirname + '/html/access.html');
                 try {
-                    const rawConfig = fs.readFileSync(__dirname + '/config/credentials.json');
+                    const rawConfig = fs.readFileSync(app.getPath("appData") + '/french-automation-robot/config/credentials.json');
                     if (rawConfig && rawConfig !== '') {
                         const {
                             id,
@@ -171,12 +174,12 @@ ipcMain.on('synchronous-message', (event, arg) => {
                 mainWindow.loadFile(__dirname + '/html/index.html')
                 mainWindow.webContents.executeJavaScript(`document.getElementById("id").innerHTML = "${robot.id}";`);
 
-                
+
             break;
 
             case 'setConfig':
                 // Store server config
-                fs.writeFileSync(__dirname + '/config/credentials.json', JSON.stringify(arg, null, 4));
+                fs.writeFileSync(app.getPath("appData") + '/french-automation-robot/config/credentials.json', JSON.stringify(arg, null, 4));
 
                 mainWindow.loadFile(__dirname + '/html/index.html')
                 mainWindow.webContents.executeJavaScript(`document.getElementById("id").innerHTML = "${arg.id}";`);
