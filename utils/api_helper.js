@@ -165,12 +165,12 @@ module.exports = {
 		// Erase existing credentials
 		credentials = null;
 
-		if (!fs.existsSync(__dirname+'/../config/credentials.json'))
+		if (!fs.existsSync(app.getPath("appData") + '/french-automation-robot/config/credentials.json'))
 			console.error("No credentials file found");
 		else {
 			// Load credentials file
 			try {
-				credentials = JSON.parse(fs.readFileSync(__dirname+'/../config/credentials.json'));
+				credentials = JSON.parse(fs.readFileSync(app.getPath("appData") + '/french-automation-robot/config/credentials.json'));
 			} catch (e) {
 				console.error("Error in credentials configuration file");
 			}
