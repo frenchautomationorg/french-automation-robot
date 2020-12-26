@@ -37,7 +37,7 @@ function createWindow () {
     mainWindow.maximize();
 
     // and load the ./html/index.html of the app.
-    mainWindow.loadFile('./html/index.html')
+    mainWindow.loadFile(__dirname + '/html/index.html')
 
     // Set Robot ID
     mainWindow.webContents.executeJavaScript(`document.getElementById("id").innerHTML = "${robot.id}";`);
@@ -47,12 +47,12 @@ function createWindow () {
     robot.mainWindow = mainWindow;
 
     // Check if config file exists
-    if (!fs.existsSync('config/credentials.json')) {
-        fs.copyFileSync('config/credentials.json.template', 'config/credentials.json');
+    if (!fs.existsSync(__dirname + '/config/credentials.json')) {
+        fs.copyFileSync(__dirname + '/config/credentials.json.template', __dirname + '/config/credentials.json');
     }
     else {
         // Autostart robot if configured
-        const rawConfig = fs.readFileSync('config/credentials.json');
+        const rawConfig = fs.readFileSync(__dirname + '/config/credentials.json');
         if (rawConfig && rawConfig !== '') {
             const { autoStart } = JSON.parse(rawConfig);
             if (autoStart) mainWindow.webContents.executeJavaScript(`document.getElementById("launchBtn").click();`);
@@ -114,9 +114,9 @@ ipcMain.on('synchronous-message', (event, arg) => {
     if (arg.method == 'get') {
         switch (arg.page) {
             case 'access':
-                mainWindow.loadFile('./html/access.html');
+                mainWindow.loadFile(__dirname + '/html/access.html');
                 try {
-                    const rawConfig = fs.readFileSync('config/credentials.json');
+                    const rawConfig = fs.readFileSync(__dirname + '/config/credentials.json');
                     if (rawConfig && rawConfig !== '') {
                         const {
                             id,
@@ -148,7 +148,7 @@ ipcMain.on('synchronous-message', (event, arg) => {
             break;
 
             default:
-                mainWindow.loadFile('./html/index.html');
+                mainWindow.loadFile(__dirname + '/html/index.html');
                 mainWindow.webContents.executeJavaScript(`document.getElementById("id").innerHTML = "${robot.id}";`);
             break;
         }
@@ -156,7 +156,7 @@ ipcMain.on('synchronous-message', (event, arg) => {
     else if (arg.method == 'post') {
         switch (arg.action) {
             case 'launchBot':
-                mainWindow.loadFile('./html/running.html')
+                mainWindow.loadFile(__dirname + '/html/running.html')
                 mainWindow.webContents.executeJavaScript(`document.getElementById("id").innerHTML = "${robot.id}";`);
 
                 robot.run();
@@ -168,7 +168,7 @@ ipcMain.on('synchronous-message', (event, arg) => {
                 robot.stop();
                 console.log("Robot stopping...");
 
-                mainWindow.loadFile('./html/index.html')
+                mainWindow.loadFile(__dirname + '/html/index.html')
                 mainWindow.webContents.executeJavaScript(`document.getElementById("id").innerHTML = "${robot.id}";`);
 
                 
@@ -176,18 +176,18 @@ ipcMain.on('synchronous-message', (event, arg) => {
 
             case 'setConfig':
                 // Store server config
-                fs.writeFileSync('config/credentials.json', JSON.stringify(arg, null, 4));
+                fs.writeFileSync(__dirname + '/config/credentials.json', JSON.stringify(arg, null, 4));
 
-                mainWindow.loadFile('./html/index.html')
+                mainWindow.loadFile(__dirname + '/html/index.html')
                 mainWindow.webContents.executeJavaScript(`document.getElementById("id").innerHTML = "${arg.id}";`);
 
                 // Reload api credentials
                 api.credentials(true);
-                mainWindow.loadFile('./html/index.html');
+                mainWindow.loadFile(__dirname + '/html/index.html');
             break;
 
             case 'cancelConfig':
-                mainWindow.loadFile('./html/index.html');
+                mainWindow.loadFile(__dirname + '/html/index.html');
                 mainWindow.webContents.executeJavaScript(`document.getElementById("id").innerHTML = "${arg.id}";`);
             break;
         }
