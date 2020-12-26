@@ -8,6 +8,6 @@ api_test.js
 files/*
 vision*
 download/*
-config/*
+config/credentials.json
 *node_modules*
 exec/
