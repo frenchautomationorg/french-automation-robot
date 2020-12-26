@@ -28,7 +28,7 @@ function createWindow () {
         webPreferences: {
             nodeIntegration: true
         },
-        icon: './assets/img/logo_fa.png'
+        icon: __dirname + '/assets/img/logo_fa.png'
     })
 
     // Open the DevTools.
@@ -51,6 +51,9 @@ function createWindow () {
     if (rawConfig && rawConfig !== '') {
         const { autoStart } = JSON.parse(rawConfig);
         if (autoStart) mainWindow.webContents.executeJavaScript(`document.getElementById("launchBtn").click();`);
+    }
+    else {
+        fs.copyFileSync('config/credentials.json.template', 'config/credentials.json');
     }
 
 
