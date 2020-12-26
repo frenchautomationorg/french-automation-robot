@@ -1,6 +1,8 @@
 const request = require('request');
 const fs = require('fs-extra');
 const { ApiError } = require('../app/errors');
+const electron = require('electron')
+const app = electron.app;
 
 const defaultOptions = {
 	rejectUnauthorized: false,
