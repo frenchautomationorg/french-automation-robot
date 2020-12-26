@@ -46,14 +46,18 @@ function createWindow () {
     // Closing parent closes children
     robot.mainWindow = mainWindow;
 
-    // Autostart robot if configured
-    const rawConfig = fs.readFileSync('config/credentials.json');
-    if (rawConfig && rawConfig !== '') {
-        const { autoStart } = JSON.parse(rawConfig);
-        if (autoStart) mainWindow.webContents.executeJavaScript(`document.getElementById("launchBtn").click();`);
+    // Check if config file exists
+    if (!fs.existsSync('config/credentials.json')) {
+        fs.copyFileSync('config/credentials.json.template', 'config/credentials.json');
     }
     else {
-        fs.copyFileSync('config/credentials.json.template', 'config/credentials.json');
+        // Autostart robot if configured
+        const rawConfig = fs.readFileSync('config/credentials.json');
+        if (rawConfig && rawConfig !== '') {
+            const { autoStart } = JSON.parse(rawConfig);
+            if (autoStart) mainWindow.webContents.executeJavaScript(`document.getElementById("launchBtn").click();`);
+        }
+
     }
 
 
