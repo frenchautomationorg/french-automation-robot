@@ -28,7 +28,7 @@ class Task {
 
 		// this._logFolder = `${__dirname}/../logs/${moment().format('DDMMYYYY')}`;
 		if (!fs.existsSync(app.getPath("logs") + `/${moment().format('DDMMYYYY')}`)) {
-			fs.mkdirSync(app.getPath("logs") + `/${moment().format('DDMMYYYY')}`, {recursive: true});
+			fs.mkdirSync(app.getPath("logs") + `/${moment().format('DDMMYYYY')}`);
 		}
 		this._logFolder = app.getPath("logs") + `/${moment().format('DDMMYYYY')}`;
 		this._logFilePath = `${this._logFolder}/${new Date().getTime()}_task_${task.id}_log.txt`;
