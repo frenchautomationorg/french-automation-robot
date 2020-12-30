@@ -27,10 +27,10 @@ class Task {
 		this._downloads = [];
 
 		// this._logFolder = `${__dirname}/../logs/${moment().format('DDMMYYYY')}`;
-		if (!fs.existsSync(app.getPath("logs") + `/french-automation-robot/logs/${moment().format('DDMMYYYY')}`)) {
-			fs.mkdirSync(app.getPath("logs") + `/french-automation-robot/logs/${moment().format('DDMMYYYY')}`, {recursive: true});
+		if (!fs.existsSync(app.getPath("logs") + `/${moment().format('DDMMYYYY')}`)) {
+			fs.mkdirSync(app.getPath("logs") + `/${moment().format('DDMMYYYY')}`, {recursive: true});
 		}
-		this._logFolder = app.getPath("logs") + `/french-automation-robot/logs/${moment().format('DDMMYYYY')}`;
+		this._logFolder = app.getPath("logs") + `/${moment().format('DDMMYYYY')}`;
 		this._logFilePath = `${this._logFolder}/${new Date().getTime()}_task_${task.id}_log.txt`;
 	}
 
