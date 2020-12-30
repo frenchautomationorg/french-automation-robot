@@ -1,3 +1,5 @@
+const electron = require('electron')
+const app = electron.app;
 const Step = require('./step');
 const { SequenceError, ApiError } = require('./errors');
 
@@ -15,7 +17,8 @@ class SequenceStep extends Step {
 
 	async init() {
         try {
-            const requirePath = `${__dirname}/../exec/program/${this._snippet}`
+            // const requirePath = `${__dirname}/../exec/program/${this._snippet}`
+            const requirePath = app.getPath("temp") + `/french-automation-robot/exec/program/${this._snippet}`
         	delete require.cache[require.resolve(requirePath)];
         	this._sequence = require(requirePath);
         } catch(err) {

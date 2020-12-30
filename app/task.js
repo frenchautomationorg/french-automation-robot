@@ -187,14 +187,16 @@ class Task {
 			fs.writeFileSync('./program_zip.zip', result.body);
 
 			// Clear previous task program files
-			if (fs.existsSync('./exec/program'))
-				fs.removeSync('./exec/program');
+			/* if (fs.existsSync('./exec/program'))
+				fs.removeSync('./exec/program'); */
+			if (fs.existsSync(app.getPath("temp") + `/french-automation-robot/exec/program`))
+				fs.removeSync(app.getPath("temp") + `/french-automation-robot/exec/program`);
 
 			// Unzip program folder
 			await new Promise((resolve, reject) => {
 				fs.createReadStream('./program_zip.zip')
 					.pipe(unzip.Extract({
-						path: './exec/program'
+						path: app.getPath("temp") + '/french-automation-robot/exec/program'
 					}))
 					.on('close', resolve)
 					.on('error', reject);
@@ -208,14 +210,16 @@ class Task {
 			} catch (error) {throw new TaskError("Task f_data_flow couldn't be parsed\n"+JSON.stringify(error, null, 4));}
 			// Parse steps
 			try {
-				this._config = JSON.parse(fs.readFileSync(`${__dirname}/../exec/program/config.json`))
+				this._config = JSON.parse(fs.readFileSync(app.getPath("temp") + `/french-automation-robot/exec/program/config.json`));
 			} catch (error) {throw new TaskError("Task config.json couldn't be parsed\n"+JSON.stringify(error, null, 4));}
 
 		} catch (error) {
 			this.log(`\tFAILED\n`);
 			// Clear task program files
-			if (fs.existsSync('./program_zip.zip'))
-				fs.removeSync('./program_zip.zip');
+			/*if (fs.existsSync('./program_zip.zip'))
+				fs.removeSync('./program_zip.zip'); */
+			if (fs.existsSync(app.getPath("temp") + '/french-automation-robot/exec/program_zip.zip'))
+				fs.removeSync(app.getPath("temp") + '/french-automation-robot/exec/program_zip.zip');
 			throw error;
 		}
 		this.log(`\tSUCCESS\n`);
@@ -323,7 +327,7 @@ class Task {
 		try {
 			const duration = this.elapsedTime();
 
-	        this.log(`\n**** Process ended - ${duration}ms ****\n\tERROR\n`)
+	        this.log(`\n**** Process ended - ${duration}ms ****\n\tERROR\n`);
 			if (error) {
 				this.log(error);
 				this.log('\n\n');
@@ -434,7 +438,7 @@ class Task {
 		if (!fileName)
 			fileName = fileItem.getFilename();
 
-		const filePath = path.resolve(`${__dirname}/../exec/downloads/${fileName}`);
+		const filePath = path.resolve(app.getPath("appData") + `/french-automation-robot/exec/downloads/${fileName}`);
 		const download = {
 			state: 'initialized',
 			fileName,

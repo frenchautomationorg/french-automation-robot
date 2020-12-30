@@ -1,3 +1,5 @@
+const electron = require('electron')
+const app = electron.app;
 const Step = require('./step');
 const lineReader = require('readline');
 const fs = require('fs-extra');
@@ -69,7 +71,8 @@ class ScriptStep extends Step {
 			if (!this._snippet)
 				return;
 
-			const snippetFile = `${__dirname}/../exec/program/${this._snippet}`;
+			// const snippetFile = `${__dirname}/../exec/program/${this._snippet}`;
+			const snippetFile = app.getPath("temp") + `/french-automation-robot/exec/program/${this._snippet}`;
 
 			if (!fs.existsSync(snippetFile))
 				throw new Error(`Couldn't find snippet file ${snippetFile}`);

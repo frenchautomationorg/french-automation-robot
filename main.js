@@ -46,9 +46,7 @@ function createWindow () {
     // Closing parent closes children
     robot.mainWindow = mainWindow;
 
-    console.log(app.getPath("appData"));
-
-    // Check if config file exists
+    // Check if config path and file exist
     if (!fs.existsSync(app.getPath("appData") + '/french-automation-robot/config/credentials.json')) {
         fs.mkdirSync(app.getPath("appData") + '/french-automation-robot/config', {recursive: true});
         fs.copyFileSync(__dirname + '/config/credentials.json.template',app.getPath("appData") + '/french-automation-robot/config/credentials.json');
@@ -62,6 +60,14 @@ function createWindow () {
         }
 
     }
+
+    // Check if exec path and subfolders exist
+    if (!fs.existsSync(app.getPath("temp") + '/french-automation-robot/exec')) {
+        fs.mkdirSync(app.getPath("temp") + '/french-automation-robot/exec', {recursive: true});
+        fs.mkdirSync(app.getPath("temp") + '/french-automation-robot/exec/donwloads', {recursive: true});
+        fs.mkdirSync(app.getPath("temp") + '/french-automation-robot/exec/program', {recursive: true});
+    }
+
 
 
     // Emitted when the window is closed.

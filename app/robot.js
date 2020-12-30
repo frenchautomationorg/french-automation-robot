@@ -2,7 +2,6 @@ const api = require('../utils/api_helper');
 const fs = require('fs-extra');
 const electron = require('electron');
 const BrowserWindow = electron.BrowserWindow;
-
 const Task = require('./task');
 const { CustomError } = require('./errors');
 
@@ -52,7 +51,7 @@ class Robot {
 	        closable: true,
 	        minimizable: false,
 	        resizable: true,
-	        webPreferences: { nodeIntegration: false } })
+	        webPreferences: { nodeIntegration: false, enableRemoteModule: true } })
 
 	    // this.window.openDevTools();
 
