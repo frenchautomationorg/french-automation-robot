@@ -64,8 +64,9 @@ function createWindow () {
     // Check if exec path and subfolders exist
     if (!fs.existsSync(app.getPath("temp") + '/french-automation-robot/exec')) {
         fs.mkdirSync(app.getPath("temp") + '/french-automation-robot/exec', {recursive: true});
-        fs.mkdirSync(app.getPath("temp") + '/french-automation-robot/exec/donwloads', {recursive: true});
+        fs.mkdirSync(app.getPath("temp") + '/french-automation-robot/exec/downloads', {recursive: true});
         fs.mkdirSync(app.getPath("temp") + '/french-automation-robot/exec/program', {recursive: true});
+        fs.copyFileSync(__dirname + '/../french-automation-robot/exec/package.json',app.getPath("temp") + '/french-automation-robot/exec/package.json');
     }
 
 

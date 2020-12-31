@@ -11,7 +11,7 @@ const SequenceStep = require('./sequence_step');
 
 const { StepError, SequenceError, TaskError, CustomError } = require('./errors');
 
-//const robotjs = require('robotjs');
+const robotjs = require('robotjs');
 
 class Task {
 	constructor(task, robot) {
