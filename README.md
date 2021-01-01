@@ -35,6 +35,7 @@ Once installed, simply execute:
 <pre><code>electron .</code></pre>
 
 
+
 ## Usage
 
 French Automation depends on a newmips application, follow the tutorial to know the prerequisites and how to initialize a configured application : <a href="https://www.frenchautomation.com/default/tutorial" rel="nofollow">https://www.frenchautomation.com/default/tutorial</a>
