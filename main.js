@@ -55,8 +55,14 @@ function createWindow () {
         // Autostart robot if configured
         const rawConfig = fs.readFileSync(app.getPath("appData") + '/french-automation-robot/config/credentials.json');
         if (rawConfig && rawConfig !== '') {
-            const { autoStart } = JSON.parse(rawConfig);
+            const { autoStart, installPath } = JSON.parse(rawConfig);
             if (autoStart) mainWindow.webContents.executeJavaScript(`document.getElementById("launchBtn").click();`);
+
+            // Set temp folder according to config file : "/opt/node" or "C:"
+            console.log("Install Path : " + installPath);
+            if ((installPath) && (installPath != ""))  {
+                app.setPath("temp", installPath);
+            }
         }
 
     }
@@ -138,6 +144,7 @@ ipcMain.on('synchronous-message', (event, arg) => {
                             idFailed,
                             idDone,
                             autoStart,
+                            installPath
                         } = JSON.parse(rawConfig);
 
                         mainWindow.webContents.executeJavaScript(`
@@ -150,6 +157,7 @@ ipcMain.on('synchronous-message', (event, arg) => {
                             document.getElementById('f_pending').value = '${idPending}';
                             document.getElementById('f_failed').value = '${idFailed}';
                             document.getElementById('f_autostart').checked = ${autoStart};
+                            document.getElementById('f_install_path').value = '${installPath}';
                         `);
                     }
                 } catch(err) {
