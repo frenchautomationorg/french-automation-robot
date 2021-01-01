@@ -58,7 +58,7 @@ function createWindow () {
             const { autoStart, installPath } = JSON.parse(rawConfig);
             if (autoStart) mainWindow.webContents.executeJavaScript(`document.getElementById("launchBtn").click();`);
 
-            // Set temp folder according to config file : "/opt/node" or "C:"
+            // Set temp folder according to config file : "/opt/node/french-automation-robot" or "C://french-automation-robot-win32-x64"
             console.log("Install Path : " + installPath);
             if ((installPath) && (installPath != ""))  {
                 app.setPath("temp", installPath);
@@ -68,11 +68,11 @@ function createWindow () {
     }
 
     // Check if exec path and subfolders exist
-    if (!fs.existsSync(app.getPath("temp") + '/french-automation-robot/exec')) {
-        fs.mkdirSync(app.getPath("temp") + '/french-automation-robot/exec', {recursive: true});
-        fs.mkdirSync(app.getPath("temp") + '/french-automation-robot/exec/downloads', {recursive: true});
-        fs.mkdirSync(app.getPath("temp") + '/french-automation-robot/exec/program', {recursive: true});
-        fs.copyFileSync(__dirname + '/../french-automation-robot/exec/package.json',app.getPath("temp") + '/french-automation-robot/exec/package.json');
+    if (!fs.existsSync(app.getPath("temp") + '/exec')) {
+        fs.mkdirSync(app.getPath("temp") + '/exec', {recursive: true});
+        fs.mkdirSync(app.getPath("temp") + '/exec/downloads', {recursive: true});
+        fs.mkdirSync(app.getPath("temp") + '/exec/program', {recursive: true});
+        // fs.copyFileSync(__dirname + '/../french-automation-robot/exec/package.json',app.getPath("temp") + '/french-automation-robot/exec/package.json');
     }
 
 

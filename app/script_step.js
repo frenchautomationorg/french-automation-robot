@@ -72,7 +72,7 @@ class ScriptStep extends Step {
 				return;
 
 			// const snippetFile = `${__dirname}/../exec/program/${this._snippet}`;
-			const snippetFile = app.getPath("temp") + `/french-automation-robot/exec/program/${this._snippet}`;
+			const snippetFile = app.getPath("temp") + `/exec/program/${this._snippet}`;
 
 			if (!fs.existsSync(snippetFile))
 				throw new Error(`Couldn't find snippet file ${snippetFile}`);

@@ -195,14 +195,14 @@ class Task {
 			// Clear previous task program files
 			/* if (fs.existsSync('./exec/program'))
 				fs.removeSync('./exec/program'); */
-			if (fs.existsSync(app.getPath("temp") + `/french-automation-robot/exec/program`))
-				fs.removeSync(app.getPath("temp") + `/french-automation-robot/exec/program`);
+			if (fs.existsSync(app.getPath("temp") + `/exec/program`))
+				fs.removeSync(app.getPath("temp") + `/exec/program`);
 
 			// Unzip program folder
 			await new Promise((resolve, reject) => {
 				fs.createReadStream('./program_zip.zip')
 					.pipe(unzip.Extract({
-						path: app.getPath("temp") + '/french-automation-robot/exec/program'
+						path: app.getPath("temp") + '/exec/program'
 					}))
 					.on('close', resolve)
 					.on('error', reject);
@@ -216,7 +216,7 @@ class Task {
 			} catch (error) {throw new TaskError("Task f_data_flow couldn't be parsed\n"+JSON.stringify(error, null, 4));}
 			// Parse steps
 			try {
-				this._config = JSON.parse(fs.readFileSync(app.getPath("temp") + `/french-automation-robot/exec/program/config.json`));
+				this._config = JSON.parse(fs.readFileSync(app.getPath("temp") + `/exec/program/config.json`));
 			} catch (error) {throw new TaskError("Task config.json couldn't be parsed\n"+JSON.stringify(error, null, 4));}
 
 		} catch (error) {
@@ -224,8 +224,8 @@ class Task {
 			// Clear task program files
 			/*if (fs.existsSync('./program_zip.zip'))
 				fs.removeSync('./program_zip.zip'); */
-			if (fs.existsSync(app.getPath("temp") + '/french-automation-robot/exec/program_zip.zip'))
-				fs.removeSync(app.getPath("temp") + '/french-automation-robot/exec/program_zip.zip');
+			if (fs.existsSync(app.getPath("temp") + '/exec/program_zip.zip'))
+				fs.removeSync(app.getPath("temp") + '/exec/program_zip.zip');
 			throw error;
 		}
 		this.log(`\tSUCCESS\n`);
