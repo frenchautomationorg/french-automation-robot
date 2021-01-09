@@ -238,7 +238,12 @@ class Task {
 			return;
 		}
 
-		for (const [stepIdx, jsonStep] of steps.entries()) {
+		let stepIdx = 0;
+		let l = steps.length;
+		while (stepIdx < l) {
+
+			let jsonStep = steps[stepIdx];
+
 			let stepError = {
 				stepIndex: stepIdx,
 				step: jsonStep
@@ -286,6 +291,18 @@ class Task {
 				// If step ended with an URL, set dom not ready. It will be set back to ready through electron 'dom-ready' event
 				if (this._step._endWith)
 					this.domReady(false);
+
+				// GoTo stepIdx
+				if (this._sessionData.goTo && this._config.steps[this._sessionData.goTo]) {
+					stepIdx = this._sessionData.goTo;
+					delete this._sessionData.goTo;
+				}
+				else {
+
+					// Go ahead
+					stepIdx = stepIdx + 1;
+				}
+
 			} catch (error) {
 				stepError.error = error;
 				throw stepError;
