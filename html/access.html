@@ -125,6 +125,10 @@
     <script type="text/javascript">
 
       $("#setConfig").click(function () {
+
+        let installPath = document.getElementById('f_install_path').value;
+        installPath = installPath.replace(/\\/g, '/');
+
         router.send('setConfig', {
           id: document.getElementById('id').value,
           back_host: document.getElementById('f_server').value,
@@ -135,7 +139,7 @@
           idFailed: document.getElementById('f_failed').value,
           idDone: document.getElementById('f_done').value,
           autoStart: document.getElementById('f_autostart').checked,
-          installPath: document.getElementById('f_install_path').value,
+          installPath: installPath,
           openDevTools: document.getElementById('f_open_dev_tools').checked
         });
       });
