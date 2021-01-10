@@ -293,9 +293,9 @@ class Task {
 					this.domReady(false);
 
 				// GoTo stepIdx
-				if (this._sessionData.goTo && this._config.steps[this._sessionData.goTo]) {
-					stepIdx = this._sessionData.goTo;
-					delete this._sessionData.goTo;
+				if (this._sessionData.goToStep && this._config.steps[this._sessionData.goToStep]) {
+					stepIdx = this._sessionData.goToStep;
+					delete this._sessionData.goToStep;
 				}
 				else {
 
