@@ -31,10 +31,10 @@ function createWindow () {
         icon: __dirname + '/assets/img/logo_fa.png'
     })
 
-    // Open the DevTools.
-    // mainWindow.webContents.openDevTools()
-
     mainWindow.maximize();
+
+    // Open the DevTools.
+    // mainWindow.webContents.openDevTools();
 
     // and load the ./html/index.html of the app.
     mainWindow.loadFile(__dirname + '/html/index.html')
@@ -55,8 +55,13 @@ function createWindow () {
         // Autostart robot if configured
         const rawConfig = fs.readFileSync(app.getPath("appData") + '/french-automation-robot/config/credentials.json');
         if (rawConfig && rawConfig !== '') {
-            const { autoStart, installPath } = JSON.parse(rawConfig);
+            const { autoStart, installPath, openDevTools } = JSON.parse(rawConfig);
+
+            // Autostart
             if (autoStart) mainWindow.webContents.executeJavaScript(`document.getElementById("launchBtn").click();`);
+
+            // Open developer console in robot pages
+            if (openDevTools) robot.devTools = true;
 
             // Set temp folder according to config file : "/opt/node/french-automation-robot" or "C://french-automation-robot-win32-x64"
             console.log("Install Path : " + installPath);
@@ -144,7 +149,8 @@ ipcMain.on('synchronous-message', (event, arg) => {
                             idFailed,
                             idDone,
                             autoStart,
-                            installPath
+                            installPath,
+                            openDevTools
                         } = JSON.parse(rawConfig);
 
                         mainWindow.webContents.executeJavaScript(`
@@ -158,6 +164,7 @@ ipcMain.on('synchronous-message', (event, arg) => {
                             document.getElementById('f_failed').value = '${idFailed}';
                             document.getElementById('f_autostart').checked = ${autoStart};
                             document.getElementById('f_install_path').value = '${installPath}';
+                            document.getElementById('f_open_dev_tools').checked = ${openDevTools};
                         `);
                     }
                 } catch(err) {

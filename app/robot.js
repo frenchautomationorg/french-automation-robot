@@ -34,6 +34,9 @@ class Robot {
 	get mainWindow() {return this._mainWindow}
 	set mainWindow(mainWin) {this._mainWindow = mainWin}
 
+	get devTools() {return this._devTools}
+	set devTools(devTools) { this._devTools = devTools}
+
 
 	//
 	// PRIVATE FUNCTIONS
@@ -54,6 +57,7 @@ class Robot {
 	        webPreferences: { nodeIntegration: false, enableRemoteModule: true } })
 
 	    // this.window.openDevTools();
+	    if (this._devTools) this.window.openDevTools();
 
 	    // When request is complete, notify task so it can continue ongoing task processing
         this.window.webContents.session.webRequest.onCompleted((details, callback) => {
@@ -162,6 +166,7 @@ class Robot {
 	stop() {
 		this._end(new CustomError("WindowClosedDuringProcess"));
 	}
+
 }
 
 module.exports = Robot;

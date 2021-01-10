@@ -90,6 +90,12 @@
                       <input class="input" id="f_autostart" name="f_autostart" value="" type="checkbox">
                   </div>
               </div>
+              <div data-field="f_open_dev_tools" class="col-xs-5">
+                  <div class="form-group">
+                      <label for="f_open_dev_tools"> Console développeur </label>&nbsp;&nbsp;
+                      <input class="input" id="f_open_dev_tools" name="f_open_dev_tools" value="" type="checkbox">
+                  </div>
+              </div>
 
               <div class="col-xs-10 col-xs-offset-1">
                   <div class="form-group">
@@ -129,7 +135,8 @@
           idFailed: document.getElementById('f_failed').value,
           idDone: document.getElementById('f_done').value,
           autoStart: document.getElementById('f_autostart').checked,
-          installPath: document.getElementById('f_install_path').value
+          installPath: document.getElementById('f_install_path').value,
+          openDevTools: document.getElementById('f_open_dev_tools').checked
         });
       });
 
