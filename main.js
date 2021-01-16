@@ -190,7 +190,7 @@ ipcMain.on('synchronous-message', (event, arg) => {
 
 
             case 'stopBot':
-                robot.stop();
+                robot.pause();
                 console.log("Robot stopping...");
 
                 mainWindow.loadFile(__dirname + '/html/index.html')

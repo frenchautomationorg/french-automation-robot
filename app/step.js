@@ -10,6 +10,8 @@ class Step {
 			jsonStep.startWith.expected = false;
 
 		Object.assign(this, {
+			_stepIdx: jsonStep.stepIdx,
+			_serialNumber: jsonStep.serialNumber,
 			_name: jsonStep.name,
 			_snippet: jsonStep.snippet,
 			_startWith: jsonStep.startWith,
@@ -35,7 +37,6 @@ class Step {
 	//
 	// GETTER/SETTER
 	//
-
 	get download() {
 		return this._download;
 	}

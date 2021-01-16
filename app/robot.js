@@ -10,6 +10,7 @@ class Robot {
 		this._task = null;
 		this._browserInitialized = false;
 		this._sessionSet = false;
+		this._started = true;
 	}
 
 	//
@@ -136,6 +137,7 @@ class Robot {
 		try {
 			// Load task if available
 			try {
+				this._started = true;
 				this._task = await Task.fetch(this);
 				if (!this._task) {
 		        	console.log("No task found");
@@ -159,12 +161,21 @@ class Robot {
 		} finally {
 			this._end();
 			console.log(`Fetching task in ${nextTimeout}`);
-			setTimeout(_ => { this.run() }, nextTimeout);
+			setTimeout(_ => { 
+
+				if (this._started) {
+					this.run() 
+				}
+			}, nextTimeout);
 		}
 	}
 
 	stop() {
 		this._end(new CustomError("WindowClosedDuringProcess"));
+	}
+
+	pause() {
+		this._started = false;
 	}
 
 }

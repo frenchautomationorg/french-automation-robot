@@ -273,8 +273,14 @@ class Task {
 					else if (jsonStep.type == 'sequence')
 						this._step = new SequenceStep(stepParams);
 
+					// Send stepData in context
+					let stepData = {
+						stepIdx: stepIdx,
+						serialNumber: stepIdx +1
+					};
+
 					// Initialize and execute step
-					await this._step.init(this._env);
+					await this._step.init(this._env, stepData);
 					// execute() can't be awaited because it depends on step's resolveStep/rejectStep
 					this._step.execute();
 				}, stepDelay);

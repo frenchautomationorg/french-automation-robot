@@ -15,8 +15,12 @@ class SequenceStep extends Step {
 	// PUBLIC FUNCTIONS
 	//
 
-	async init() {
+	async init(environmentVars, stepData) {
         try {
+
+            // Initialize stepData in utils
+            this._utils.stepData = stepData;
+
             // const requirePath = `${__dirname}/../exec/program/${this._snippet}`
             const requirePath = app.getPath("temp") + `/exec/program/${this._snippet}`
         	delete require.cache[require.resolve(requirePath)];

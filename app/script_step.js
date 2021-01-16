@@ -65,7 +65,7 @@ class ScriptStep extends Step {
 	// PUBLIC FUNCTIONS
 	//
 
-	async init(environmentVars) {
+	async init(environmentVars, stepData) {
 		try {
 			// No script file
 			if (!this._snippet)
@@ -87,8 +87,13 @@ class ScriptStep extends Step {
 	            	if (environmentVars[matches[1]])
 	                	script = script.replace(matches[0], environmentVars[matches[1]]);
 
-        	// Prepend sessionData and env to script
+        	// Prepend stepData, sessionData and env to script
         	this._script = '';
+        	try {
+        		this._script += `stepData = ${JSON.stringify(stepData, null, 4)};\n`;
+        	} catch(err) {
+        		this.log("WARN: Couldn't prepend stepData to script");
+        	}
         	try {
         		this._script += `sessionData = ${JSON.stringify(this.utils.sessionData, null, 4)};\n`;
         	} catch(err) {
