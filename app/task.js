@@ -299,8 +299,10 @@ class Task {
 					this.domReady(false);
 
 				// GoTo stepIdx
-				if (this._sessionData.goToStep && this._config.steps[this._sessionData.goToStep]) {
-					stepIdx = this._sessionData.goToStep;
+				if (this._sessionData.goToStep && this._config.steps[this._sessionData.goToStep - 1]) {
+
+					// Using serial number of step to reach index in array
+					stepIdx = this._sessionData.goToStep - 1;
 					delete this._sessionData.goToStep;
 				}
 				else {
