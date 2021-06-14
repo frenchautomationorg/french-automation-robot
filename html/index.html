@@ -32,7 +32,7 @@
                 <button id="launchBtn" class="btn btn-lg btn-success"><i class="fa fa-rocket"></i>&nbsp;&nbsp;
                   Lancer les traitements
                 </button>
-              </center> 
+              </center>
             </div>
           </div>
         </div>
@@ -44,26 +44,21 @@
         <div class="white-line"></div>
         <div class="footer-wrapper">French Automation IT &trade; - Version v1.0.0</div>
       </div>
-      
     </div>
 
     <!-- Latest compiled and minified JavaScript -->
     <script>
       window.jQuery = window.$ = require("../assets/js/jquery.min.js");
       const router = require('../assets/js/router.js');
-
+      require('../utils/renderer.js')
     </script>
 
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
 
-    <script>
-      // You can also require other files to run in this process
-      require('../utils/renderer.js')
-    </script>
     <script type="text/javascript">
       $("a").click(function(event) {
         if ($(this).attr('href')) {
-          event.preventDefault();
+          event.preventDefault();event.stopPropagation();
           router.load($(this).attr('href'));
         }
       });

@@ -11,7 +11,7 @@ const SequenceStep = require('./sequence_step');
 
 const { StepError, SequenceError, TaskError, CustomError } = require('./errors');
 
-const robotjs = require('robotjs');
+// const robotjs = require('robotjs');
 
 class Task {
 	constructor(task, robot) {
@@ -293,10 +293,6 @@ class Task {
 				// If step extracted data, merge with Task sessionData
 				if (data)
 					this._sessionData = {...this._sessionData, ...data};
-
-				// If step ended with an URL, set dom not ready. It will be set back to ready through electron 'dom-ready' event
-				if (this._step._endWith)
-					this.domReady(false);
 
 				// GoTo stepIdx
 				if (this._sessionData.goToStep && this._config.steps[this._sessionData.goToStep - 1]) {

@@ -17,7 +17,7 @@ const Menu = electron.Menu;
 var fs = require('fs');
 
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = true;
-process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+// process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
 function createWindow () {
 
@@ -26,7 +26,9 @@ function createWindow () {
         width: 800,
         height: 600,
         webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
+            contextIsolation: false,
+            enableRemoteModule: false
         },
         icon: __dirname + '/assets/img/logo_fa.png'
     })
@@ -49,7 +51,24 @@ function createWindow () {
     // Check if config path and file exist
     if (!fs.existsSync(app.getPath("appData") + '/french-automation-robot/config/credentials.json')) {
         fs.mkdirSync(app.getPath("appData") + '/french-automation-robot/config', {recursive: true});
-        fs.copyFileSync(__dirname + '/config/credentials.json.template',app.getPath("appData") + '/french-automation-robot/config/credentials.json');
+        const credentialsTempalte = {
+            "method": "post",
+            "action": "setConfig",
+            "id": "1",
+            "back_host": "https://",
+            "clientKey": "",
+            "clientSecret": "",
+            "idPending": "1",
+            "idProcessing": "2",
+            "idFailed": "3",
+            "idDone": "4",
+            "autoStart": false,
+            "openDevTools": false
+        }
+        credentialsTempalte.installPath = process.platform == 'win32'
+            ? __dirname
+            : "/opt/node/french-automation-robot";
+        fs.writeFileSync(app.getPath("appData") + '/french-automation-robot/config/credentials.json', JSON.stringify(credentialsTempalte, null, 4), 'utf8');
     }
     else {
         // Autostart robot if configured

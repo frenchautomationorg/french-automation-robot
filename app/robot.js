@@ -51,7 +51,7 @@ class Robot {
 	    this.window = new BrowserWindow({
 	    	width: 1000,
 	    	height: 1000,
-	    	alwaysOnTop: true,
+	    	alwaysOnTop: false,
 	        closable: true,
 	        minimizable: false,
 	        resizable: true,
@@ -82,7 +82,6 @@ class Robot {
         this.window.webContents.on('did-navigate', (event, url) => {
         	if (!this._task)
         		return;
-
         	this._task.domReady(false);
         	this._task.inputUrl({method: 'get', url: url});
         });
