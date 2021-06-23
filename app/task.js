@@ -95,6 +95,9 @@ class Task {
 			taskId: this.id,
 			env: this._env,
 			sessionData: this._sessionData,
+			log: param => {
+				this.log(param)
+			},
 			api: api,
 			error: code => {
 				throw new CustomError(code);
@@ -419,6 +422,7 @@ class Task {
 						await this.executeSteps(this._config.steps);
 
 					} catch(stepError) {
+						this._sessionData.errorInfo = stepError;
 						// Execute onError and re-throw so `failed()` is executed
 						await this.executeErrorSteps();
 						throw stepError;

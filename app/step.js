@@ -46,7 +46,7 @@ class Step {
 	//
 
 	_timedOut() {
-		this.error(new StepError("Step timed out after - "+this._timeoutValue+'ms'));
+		this.error(new StepError(`Step ${this._stepIdx} - ${this._name} : Step timed out after - ${this._timeoutValue}ms`));
 	}
 
 	* _stepActionsIterator() {
