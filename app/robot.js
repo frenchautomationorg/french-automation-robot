@@ -3,7 +3,7 @@ const fs = require('fs-extra');
 const electron = require('electron');
 const BrowserWindow = electron.BrowserWindow;
 const Task = require('./task');
-const { CustomError } = require('./errors');
+const { ProgramError } = require('./errors');
 
 class Robot {
 	constructor() {
@@ -170,7 +170,7 @@ class Robot {
 	}
 
 	stop() {
-		this._end(new CustomError("WindowClosedDuringProcess"));
+		this._end(new ProgramError("WindowClosedDuringProcess"));
 	}
 
 	pause() {

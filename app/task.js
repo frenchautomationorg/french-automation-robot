@@ -9,7 +9,7 @@ const path = require('path');
 const ScriptStep = require('./script_step');
 const SequenceStep = require('./sequence_step');
 
-const { StepError, SequenceError, TaskError, CustomError } = require('./errors');
+const { StepError, SequenceError, TaskError, ProgramError } = require('./errors');
 
 // const robotjs = require('robotjs');
 
@@ -99,8 +99,8 @@ class Task {
 				this.log(param)
 			},
 			api: api,
-			error: code => {
-				throw new CustomError(code);
+			error: (code, message) => {
+				throw new ProgramError(code, message);
 			},
 			download: url => {
 				this.window.webContents.downloadURL(url);
@@ -196,8 +196,6 @@ class Task {
 			fs.writeFileSync('./program_zip.zip', result.body);
 
 			// Clear previous task program files
-			/* if (fs.existsSync('./exec/program'))
-				fs.removeSync('./exec/program'); */
 			if (fs.existsSync(app.getPath("temp") + `/exec/program`))
 				fs.removeSync(app.getPath("temp") + `/exec/program`);
 
@@ -225,8 +223,6 @@ class Task {
 		} catch (error) {
 			this.log(`\tFAILED\n`);
 			// Clear task program files
-			/*if (fs.existsSync('./program_zip.zip'))
-				fs.removeSync('./program_zip.zip'); */
 			if (fs.existsSync(app.getPath("temp") + '/exec/program_zip.zip'))
 				fs.removeSync(app.getPath("temp") + '/exec/program_zip.zip');
 			throw error;
@@ -245,7 +241,10 @@ class Task {
 		let l = steps.length;
 		while (stepIdx < l) {
 
-			let jsonStep = steps[stepIdx];
+			let jsonStep = {
+				...steps[stepIdx],
+				stepIdx
+			};
 
 			let stepError = {
 				stepIndex: stepIdx,
@@ -422,7 +421,11 @@ class Task {
 						await this.executeSteps(this._config.steps);
 
 					} catch(stepError) {
-						this._sessionData.errorInfo = stepError;
+						this._sessionData.errorInfo = {
+							...(stepError.step),
+							code: stepError.error.code,
+							message: stepError.error.message
+						};
 						// Execute onError and re-throw so `failed()` is executed
 						await this.executeErrorSteps();
 						throw stepError;

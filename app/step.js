@@ -16,7 +16,6 @@ class Step {
 			_snippet: jsonStep.snippet,
 			_startWith: jsonStep.startWith,
 			_endWith: jsonStep.endWith,
-			_next: jsonStep.next,
 			_download: jsonStep.download,
 			_ignoreList: jsonStep.ignoreList,
 			_window: win,

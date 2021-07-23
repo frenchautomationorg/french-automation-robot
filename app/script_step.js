@@ -3,7 +3,7 @@ const app = electron.app;
 const Step = require('./step');
 const lineReader = require('readline');
 const fs = require('fs-extra');
-const { ScriptError, StepError, CustomError } = require('./errors');
+const { ScriptError, StepError, ProgramError } = require('./errors');
 
 let CONSOLE_ERROR;
 let PREPENDED_LINES = 0;
@@ -22,7 +22,7 @@ class ScriptStep extends Step {
 		// `this` isn't the class context but the callback function
 		// Use global variables
 		if (level === 3)
-			CONSOLE_ERROR = new CustomError(message.replace(/^Uncaught [^]+: /, ''));
+			CONSOLE_ERROR = new ProgramError(message.replace(/^Uncaught [^]+: /, ''));
 	}
 
 	async _executeScript() {
