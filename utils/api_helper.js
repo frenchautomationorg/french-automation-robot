@@ -1,3 +1,4 @@
+/** @module api_helper */
 const request = require('request');
 const fs = require('fs-extra');
 const { ApiError } = require('../app/errors');
@@ -72,6 +73,10 @@ function call(callOptions, loopCount) {
 }
 
 module.exports = {
+	/** Execute an HTTP call to the API<br>
+	 * It will handle API authentication token generation / refresh and build the request's header
+	 * @param {Object} callOptions - API call options. See requestjs for details
+	 */
 	call: async (callOptions) => {
 		if (!credentials) {
 			throw new ApiError("Can't make API call. No credentials defined");
@@ -91,6 +96,10 @@ module.exports = {
 
 		return await call(callOptions, 0);
 	},
+	/** Upload a file to the API<br>
+	 * Takes the same parameter as {@link module:api_helper.call api_helper.call()} with a stream property of the file's readstream
+	 * @param {Object} callOptions - API call options. See requestjs for details
+	 */
 	upload: function(callOptions) {
 		return new Promise(function(resolve,reject) {
 			if (!credentials)
@@ -157,9 +166,13 @@ module.exports = {
 			});
 		});
 	},
+	/** Current API bearer token */
 	token: function() {
 		return BEARER_TOKEN;
 	},
+	/** Get credentials set in the configuration page of French Automation<br>
+	 * @param {bool} reload - Whether to reload the credentials from file before returning
+	 */
 	credentials: function(reload = false) {
 		if (!reload && credentials)
 			return credentials;

@@ -8,7 +8,18 @@ const { ScriptError, StepError, ProgramError } = require('./errors');
 let CONSOLE_ERROR;
 let PREPENDED_LINES = 0;
 
+/** Step that executes a script on the web client
+ * @extends Step
+ */
 class ScriptStep extends Step {
+	/**
+	 * @param {promise} resolveStep - Resolve callback provided by Task. Allow resolving from Task as well as from Step
+	 * @param {promise} rejectStep - Reject callback provided by Task. Allow rejecting from Task as well as from Step
+	 * @param {Object} jsonStep - Step configuration object
+	 * @param {Object} win - Electron task's window
+	 * @param {function} log - Log function of {@link Task#log Task.log}
+	 * @param {bool} isDomReady - Whether to start step execution right away or wait for the DOM to be ready
+	 */
 	constructor({resolveStep, rejectStep, jsonStep, win, utils, log, isDomReady = false}) {
 		super(resolveStep, rejectStep, jsonStep, win, log, isDomReady);
 		this.utils = utils;
@@ -17,6 +28,10 @@ class ScriptStep extends Step {
 	//
 	// PRIVATE FUNCTIONS
 	//
+
+	/** Callback for window's 'console-message' event<br>
+	 * Store the console message to fetch error from it
+	 */
 	consoleMessage(event, level, message, line, sourceId) {
 		// Called by webContents console-message event
 		// `this` isn't the class context but the callback function
@@ -25,6 +40,9 @@ class ScriptStep extends Step {
 			CONSOLE_ERROR = new ProgramError(message.replace(/^Uncaught [^]+: /, ''));
 	}
 
+	/** Bind 'console-message' event callback and execute step's script<br>
+	 * Any data returned by the script will be appended to sessionData object
+	 */
 	async _executeScript() {
 		try {
 			CONSOLE_ERROR = undefined;
@@ -65,6 +83,9 @@ class ScriptStep extends Step {
 	// PUBLIC FUNCTIONS
 	//
 
+	/** Initialize the step<br>
+	 * Prepend step's env and task's sessionData to the executed script so the variables can be accessed inside the web client
+	 */
 	async init(environmentVars, stepData) {
 		try {
 			// No script file

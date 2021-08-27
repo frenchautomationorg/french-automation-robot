@@ -1,3 +1,7 @@
+/** @namespace Errors
+ * Error classes thrown by the Robot process
+ */
+
 class AutomationError extends Error {
     constructor(error) {
         super(error)

@@ -4,7 +4,9 @@ const electron = require('electron');
 const BrowserWindow = electron.BrowserWindow;
 const Task = require('./task');
 const { ProgramError } = require('./errors');
-
+/** Main Robot class
+ * Handles electron task window initialization and program execution start
+ */
 class Robot {
 	constructor() {
 		this._task = null;
@@ -16,7 +18,9 @@ class Robot {
 	//
 	// STATIC
 	//
-
+	/** Where to find the fetched task's program on disk
+	 * @readonly
+	 */
 	static get EXEC_FOLDER() {return 'program'};
 
 
@@ -24,6 +28,7 @@ class Robot {
 	// GETTER/SETTER
 	//
 
+	/** Fetches credentials from configuration using {@link module:api_helper.credentials api_helper.credentials()} */
 	get id() {
 		const credentials = api.credentials();
 		return credentials ? credentials.id : -1;
@@ -35,6 +40,7 @@ class Robot {
 	get mainWindow() {return this._mainWindow}
 	set mainWindow(mainWin) {this._mainWindow = mainWin}
 
+
 	get devTools() {return this._devTools}
 	set devTools(devTools) { this._devTools = devTools}
 
@@ -43,6 +49,7 @@ class Robot {
 	// PRIVATE FUNCTIONS
 	//
 
+	/** Initialize task's browser window */
 	_initBrowser() {
 		if (this._browserInitialized == true)
 			return;
@@ -111,6 +118,10 @@ class Robot {
 	    this._browserInitialized = true;
 	}
 
+	/** Ends robot's execution<br>
+	 * Clean stop and delete of robot and any running task<br>
+	 * Destroys and delete the task's window
+	 */
 	_end(err) {
 		if (this._task) {
 			this._task.stop(err);
@@ -131,6 +142,10 @@ class Robot {
 	// PUBLIC FUNCTIONS
 	//
 
+	/** Main entry point of robot execution<br>
+	 * First fetch potential pending Task, then starts it and await its completion<br>
+	 * Always ends with a recursive call to itself after 5s
+	 */
 	async run() {
 		let nextTimeout = 5000;
 		try {
@@ -160,19 +175,21 @@ class Robot {
 		} finally {
 			this._end();
 			console.log(`Fetching task in ${nextTimeout}`);
-			setTimeout(_ => { 
-
+			setTimeout(_ => {
 				if (this._started) {
-					this.run() 
+					this.run()
 				}
 			}, nextTimeout);
 		}
 	}
 
+	/** Public function to stop robot execution, triggered by closing the task's window<br>
+	 * Internaly calls {@link Robot#_end Robot._end()} with WindowClosedDuringProcess error */
 	stop() {
 		this._end(new ProgramError("WindowClosedDuringProcess"));
 	}
 
+	/** Stops {@link Robot#run Robot.run()} recursive calls */
 	pause() {
 		this._started = false;
 	}

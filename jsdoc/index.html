@@ -1,0 +1,321 @@
+<!-- start:readme.hbs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+		<title>French Automation Robot</title>
+		<!--[if lt IE 9]>
+		<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+		<![endif]-->
+		<link href="https://fonts.googleapis.com/css?family=PT+Mono" rel="stylesheet">
+		<link type="text/css" rel="stylesheet" href="css/bootstrap.min.css">
+		<link type="text/css" rel="stylesheet" href="css/prism.min.css">
+		<link type="text/css" rel="stylesheet" href="css/template.min.css">
+			<style>
+				.page-header,
+				pre.code-toolbar > .toolbar:hover {
+					background-color: systemColor;
+				}
+				.callout-primary,
+				.toc .nav > li > a:hover,
+				.toc .nav > li > a:focus,
+				.toc .nav > li.active > a,
+				.toc .nav > li.active > a:hover,
+				.toc .nav > li.active > a:focus,
+				pre.code-toolbar > .toolbar:hover {
+					border-left-color: systemColor;
+				}
+				pre.code-toolbar > .toolbar:hover {
+					border-bottom-color: systemColor;
+				}
+				.callout-primary h5,
+				.symbol-title.collapsible-symbol .toggle-icon,
+				.breadcrumb li a,
+				.toc .nav > li > a:hover,
+				.toc .nav > li > a:focus,
+				.toc .nav > li.active > a,
+				.toc .nav > li.active > a:hover,
+				.toc .nav > li.active > a:focus {
+					color: systemColor;
+				}
+			</style>
+		<script type="text/javascript">
+			window.TEMPLATE_OPTIONS = {"includeDate":true,"dateFormat":"dateFormat","systemName":"French Automation Robot","systemSummary":"systemSummary","systemLogo":"","systemColor":"systemColor","navMembers":[{"kind":"class","title":"Classes","summary":"All documented classes."},{"kind":"external","title":"Externals","summary":"All documented external members."},{"kind":"global","title":"Globals","summary":"All documented globals."},{"kind":"mixin","title":"Mixins","summary":"All documented mixins."},{"kind":"interface","title":"Interfaces","summary":"All documented interfaces."},{"kind":"module","title":"Modules","summary":"All documented modules."},{"kind":"namespace","title":"Namespaces","summary":"All documented namespaces."},{"kind":"tutorial","title":"Tutorials","summary":"All available tutorials."}],"footer":"footer","copyright":"copyright","linenums":true,"collapseSymbols":true,"inverseNav":true,"inlineNav":true,"outputSourceFiles":true,"sourceRootPath":null,"disablePackagePath":true,"outputSourcePath":true,"showTableOfContents":true,"showAccessFilter":true,"analytics":{"ua":"UA-XXXXX-XXX","domain":"XXXX"},"methodHeadingReturns":true,"sort":"","search":true,"favicon":"","stylesheets":[],"scripts":[],"monospaceLinks":false,"cleverLinks":false};
+			window.DOCLET_TOC_ENABLED = true;
+			window.DOCLET_AFILTER_ENABLED = false;
+		</script>
+</head>
+<body>
+	<!-- start:navbar.hbs -->
+	<header class="navbar navbar-default navbar-fixed-top navbar-inverse">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="index.html">
+					French Automation Robot
+				</a>
+				<!-- displayed on small devices -->
+				<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+			</div>
+			<div class="navbar-collapse collapse" id="topNavigation">
+				<ul class="nav navbar-nav">
+							<li><a href="global.html">Globals</a></li>
+							<li><a href="list_class.html">Classes</a></li>
+							<li><a href="list_module.html">Modules</a></li>
+				</ul>
+					<!-- start:lunr-search-navbar.hbs -->
+					<form class="navbar-form navbar-right" role="search">
+						<div class="input-group">
+							<input type="text" class="form-control" placeholder="Search" id="lunr-search-input">
+							<div class="input-group-btn">
+								<button class="btn btn-default" id="lunr-search-submit">
+									<i class="glyphicon glyphicon-search"></i>
+								</button>
+							</div>
+						</div>
+					</form>
+					<!-- start:lunr-search-navbar.hbs -->		</div>
+		</div>
+	</header>
+	<!-- end:navbar.hbs -->		<div class="page-header">
+			<div class="container">
+				<span class="kind">readme</span>
+				<h1><span class="name">French Automation Robot</span></h1>
+				<div class="summary"><p>systemSummary</p></div>			</div>
+		</div>
+	<div class="container content">
+		<div class="row">
+			<div class="col-md-9 main-content">
+		<section class="readme-section">
+			<article><h1>French Automation Robot</h1>
+<p>RPA Open Source French Automation</p>
+<h2>Overview</h2>
+<p>French Automation is an Open Source RPA / RDA software suite based on :</p>
+<ul>
+  <li>Newmips NodeJS development Studio : https://www.newmips.com/</li>
+  <li>A web-based application called Orchestrator that manages Business activities and dispatches automated tasks between connected Robots</li>
+  <li>An ElectronJS Robot that executes tasks on user desktop or remotely</li>
+</ul>
+<p> More details can be found on the official website : <a href="https://www.frenchautomation.com/" target="_blank" rel="nofollow">https://www.frenchautomation.com/</a></p>
+<br/>
+<h2>Screenshot</h2>
+<p><img src="https://www.frenchautomation.com/img/robot_electron.png" width="75%" /></p>
+<br/>
+<h2>Installation</h2>
+<p>Please refer to installation instructions and prerequisites on our Website : <a href="https://www.frenchautomation.com/default/robot" rel="nofollow">https://www.frenchautomation.com/default/robot</a></p>
+<p>Clone repository :</p>
+<pre><code>git clone git@github.com:frenchautomationorg/french-automation-robot.git</code></pre>
+<p>Install modules and run application logged as "root" :</p>
+<pre><code>sudo npm install -g electron --unsafe-perm=true --allow-root<br/>
+sudo npm i<br/>
+sudo npm i electron-rebuild --save<br/>
+sudo ./node_modules/.bin/electron-rebuild</code></pre>
+<br/>
+<br/>
+Once installed, simply execute:
+<pre><code>electron .</code></pre>
+<h2>Usage</h2>
+<p>French Automation depends on a newmips application, follow the tutorial to know the prerequisites and how to initialize a configured application : <a href="https://www.frenchautomation.com/default/tutorial" rel="nofollow">https://www.frenchautomation.com/default/tutorial</a>
+<br>
+We're going to see how it works and how to build a program file for your newmips Task.</p>
+<h3>Fetch Task</h3>
+<p>Once the robot is started and running, it will query the API every 5 secondes and check for pending tasks assigned to this robot :</p>
+<pre>
+GET '[HOST]/api/task?fk_id_robot_robot=[ROBOT_ID]&fk_id_status_state=[PENDING_ID]&include=r_state&limit=1'
+</pre>
+<p><code>[HOST]</code>, <code>[ROBOT_ID]</code> and <code>[PENDING_ID]</code> are defined using configuration page.</p>
+<p>It will download and unzip the task's program files.</p>
+<h3>Task configuration</h3>
+<p>Task's zip file is expected to have a <code>config.json</code> file for the Task to run.</p>
+<pre>
+{
+  "steps": [
+      ....
+    ],
+    "onError": ...
+}
+</pre>
+<p><code>config.json</code> must be placed at zip's root directory</p>
+<pre>
+program.zip/
+ - config.json
+ - sessionScripts/
+   - login.js
+   - logout.js
+ - fetchData.js
+</pre>
+<h4>steps</h4>
+<p>JSON configuration must provide a <code>steps</code> array containing each steps of this Task. The order of the array will define order of execution.</p>
+<br>
+Each of the following step properties are optionnal and will be executed in the following order if found :
+<ul>
+<li>startWith</li>
+Providing a startWith object will start the execution of the step by loading the provided url :
+<pre>
+{
+  "url": "https://target-website/login",
+    "method": "GET"
+}
+</pre>
+<li>snippet</li>
+A path to a javascript file to execute on the currently loaded page. Root dir is the unzipped Task's program file
+<br>
+Depending on the step's `type` value, it is executed as javascript on the frontend or nodejs on backend
+<pre>
+"snippet": "script/fill_and_submit_login_form.js"
+</pre>
+<br>
+<li>download</li>
+<p>Triggers a download</p>
+<pre>
+{
+  "url": "https://target-website/download",
+  "method": "get",
+  "name": "stepfile.pdf"
+}
+</pre>
+<li>endWith</li>
+Providing a endWith object will wait for the provided url to end the ongoing step :
+<pre>
+{
+  "url": "https://target-website/logout",
+  "method": "POST"
+}
+</pre>
+</ul>
+<br>
+Steps require the property `type` to define the type of script it will execute. Two types are possible, 'action' and 'sequence'.
+<br>
+<h5>Step type 'action'</h5>
+<p>An <code>'action'</code> step is a frontend script. It expects a javascript file that will be executed on the currently loaded page.
+<br>
+The script is expected to return a promise. This promise result will be added to the step sessionData object
+<br>
+Example :</p>
+<pre>
+  (_ => {
+    return new Promise((resolve, reject) => {
+      setTimeout(function() {
+        resolve({inputValue: $("#data").text()});
+      })
+    })
+  })().then(results => results);
+</pre>
+<h5>Step type 'sequence'</h5>
+<p>A <code>'sequence'</code> step is a nodejs script. Its <code>snippet</code> property will be executed as a nodejs module and must export a function <code>execute(utils)</code>.</p>
+<p>The parameter <code>utils</code> sent to <code>execute(utils)</code> contains :</p>
+<pre>
+{
+  "window": {} // The electron `BrowserWindow` object in use
+  "robotId": int // Running robot ID
+  "taskId": int // Current Task id
+  "env": {} // The Task's `f_data_flow` field, filled through Media Task and parsed to JSON
+  "sessionData": {} // Object filled through script steps
+  "api": { // Functions to use API connection
+      "call": function(options) // Send a request, options should match `requestjs` requirements
+      "upload": function(options) // Same as `call()` but using `options.stream` property to stream a file
+      "map": function(options) // Map values according to configuration entities in orchestrator
+    }
+  "waitDownloads": async function() // Return a promise that resolve when all downloads are done
+}
+</pre>
+<br>
+<h5>Step optional properties</h5>
+<table>
+  <tbody>
+    <tr>
+      <td>timeout</td>
+      <td>A timeout in milliseconds that will trigger step failure</td>
+    </tr>
+    <tr>
+      <td>delay</td>
+      <td>A delay in milliseconds that will delay step execution</td>
+    </tr>
+    <tr>
+      <td>name</td>
+      <td>The step name. Only used for config.json and logs readability</td>
+    </tr>
+  </tbody>
+</table>
+<h4>onError</h4>
+<p><code>config.json</code> can provide <code>onError</code> property that will be executed if the task encounter an error. It can be useful to reset changes, logout or whatever is needed before finishing the task.</p>
+<p><code>onError</code> can be defined in 3 ways :</p>
+<ul>
+<li>An index of a step from the steps array</li>
+<li>A step object</li>
+<li>An array of step objects</li>
+</ul>
+<h2>Contribute</h2>
+<p>We encourage you to contribute to French Automation software suite.</p>
+<ul>
+  <li>Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet</li>
+  <li>Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it</li>
+  <li>Fork the project</li>
+  <li>Start a feature/bugfix branch</li>
+  <li>Commit and push until you are happy with your contribution</li>
+  <li>Make sure to add tests for it. This is important so we don't break it in a future version unintentionally.</li>
+  <li>Please try not to mess with the branches, versions, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so we can cherry-pick around it.</li>
+ </ul>
+<br/>
+<h2>See also</h2>
+<ul>
+  <li><a href="https://www.frenchautomation.com/default/concepts" target="_blank">Concepts</a></li>
+  <li><a href="https://www.frenchautomation.com/default/rpa" target="_blank">Methodology</a></li>
+  <li><a href="https://www.frenchautomation.com/default/overview" target="_blank">Architecture</a></li>
+  <li><a href="https://www.frenchautomation.com/default/tutorial" target="_blank">Tutorial</a></li>
+  <li><a href="https://docs.frenchautomation.com/" target="_blank">Documentation</a></li>
+</ul>
+<br/>
+<h2>Licenses</h2>
+<p>French Automation is released under the <a href="http://opensource.org/licenses/GPL-3.0">GNU General Public License version 3</a> license.</p></article>
+		</section>
+			</div>
+				<div class="col-md-3 side-content">
+					<nav class="toc hidden-print hidden-sm hidden-xs"></nav>
+				</div>
+		</div>
+	</div>
+	<footer>
+				<div class="footer-option">footer</div>
+				<div class="copyright">copyright</div>
+			<div class="generated-by">Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on 4pmt4For57pmt using the <a href="https://github.com/steveush/foodoc">FooDoc template</a>.</div>
+	</footer>
+	<script src="js/jquery.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/clipboard.min.js"></script>
+	<script src="js/prism.min.js"></script>
+	<script src="js/template.min.js"></script>
+		<!-- start:lunr-search-modal.hbs -->
+		<div class="modal fade" id="lunr-search-modal">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title">Search results</h4>
+					</div>
+					<div class="modal-body" id="lunr-search-body">
+					</div>
+					<div class="modal-footer" id="lunr-search-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal-dialog -->
+		</div>
+		<!-- end:lunr-search-modal.hbs -->		<script src="js/lunr.min.js"></script>
+	
+		<script>
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+			ga('create', 'UA-XXXXX-XXX', 'XXXX');
+			ga('send', 'pageview');
+		</script>
+	
+</body>
+</html>
+<!-- end:readme.hbs -->

@@ -1,6 +1,18 @@
 const { ApiError, StepError, ScriptError, SequenceError, AutomationError } = require('./errors');
 
+/** Parent class of {@link ScriptStep} and {@link SequenceStep}
+ * @abstract
+ */
 class Step {
+	/**
+	 * Step constructor called from child classes
+	 * @param {promise} resolveStep - Resolve callback provided by Task. Allow resolving from Task as well as from Step
+	 * @param {promise} rejectStep - Reject callback provided by Task. Allow rejecting from Task as well as from Step
+	 * @param {Object} jsonStep - Step configuration object
+	 * @param {Object} win - Electron task's window
+	 * @param {function} log - Log function of {@link Task#log Task.log}
+	 * @param {bool} isDomReady - Whether to start step execution right away or wait for the DOM to be ready
+	 */
 	constructor(resolveStep, rejectStep, jsonStep, win, log, isDomReady) {
 		this._resolveStep = resolveStep;
 		this._rejectStep = rejectStep;
@@ -44,10 +56,15 @@ class Step {
 	// PRIVATE FUNCTIONS
 	//
 
+	/** Triggers a {@link StepError} when step's timeout is reached */
 	_timedOut() {
 		this.error(new StepError(`Step ${this._stepIdx} - ${this._name} : Step timed out after - ${this._timeoutValue}ms`));
 	}
 
+	/** Handle step actions<br>
+	 * Yields for an inputUrl to match with startWith and endWith if provided
+	 * Triggers script execution and downloads
+	 */
 	* _stepActionsIterator() {
 		// Wait for starting url
 		if (this._startWith && this._startWith.expected == true) {
@@ -99,6 +116,9 @@ class Step {
 	// PUBLIC FUNCTIONS
 	//
 
+	/** Entry point for step execution<br>
+	 * Create a stepActionIterator generator and triggers startWith url if provided
+	 */
 	execute() {
 		// Create iterator object from generator function
 		this._urlAction = this._stepActionsIterator();
@@ -111,6 +131,9 @@ class Step {
 			this._window.webContents.loadURL(this._startWith.url);
 	}
 
+	/** Provides rendered url to stepActionIterator<br>
+	 * If endWith url is reached, resolve step's promise
+	 */
 	inputUrl(details) {
 		try {
 			if (!this._urlAction)
@@ -123,11 +146,13 @@ class Step {
 		}
 	}
 
+	/** Resolve step promise */
 	success() {
 		clearTimeout(this._timeout);
 		this._resolveStep(this._sessionData);
 	}
 
+	/** Reject step promise */
 	error(err) {
 		clearTimeout(this._timeout);
 		if (!(err instanceof AutomationError))
@@ -135,6 +160,7 @@ class Step {
 		this._rejectStep(err);
 	}
 
+	/** Change DOM state boolean and triggers any pending script */
 	domReady(isReady) {
 		this._domReady = isReady;
 		if (this._domReady === true && this._scriptWaiting == true) {
