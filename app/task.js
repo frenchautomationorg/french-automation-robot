@@ -86,14 +86,12 @@ class Task {
 		// Fetch task from API
 		let result = await api.call({url: '/api/task?fk_id_robot_robot=' + robot.id + '&fk_id_status_state='+Task.PENDING+'&include=r_state&limit=1'});
 
-		let tasks = result.body.tasks;
-
 		// No task available
-		if (!result.body.tasks || !result.body.tasks.length || result.body.tasks.length == 0)
+		if (!result.body.task || !result.body.task.length || result.body.task.length == 0)
 			return null;
 
 		// Create task instance
-		let task = new Task(result.body.tasks[0], robot);
+		let task = new Task(result.body.task[0], robot);
 
 		// Indicate to orchestrator that task is now in process
 		await api.call({url: '/api/task/' + task.id, body: {r_state: Task.PROCESSING, f_execution_start_date: new Date()}, method: 'put'});
@@ -221,7 +219,7 @@ class Task {
 			this._writeStream.on('finish', async _ => {
 				try {
 					await api.upload({
-						url: '/api/execution/'+this._executionId+'/logfile', method: 'post',
+						url: '/api/automation/logfile/'+this._executionId, method: 'post',
 						stream: fs.createReadStream(this._logFilePath)
 					});
 				} catch(err) {
@@ -243,7 +241,7 @@ class Task {
 
 		try {
 			// Download zip file
-			let result = await api.call({url: '/api/task/'+this._id+'/downloadProgram', encoding: null});
+			let result = await api.call({url: '/api/automation/downloadProgram/'+this._id, encoding: null});
 			if (result.response.statusCode == 404)
 				throw new TaskError("Task doesn't have a program file");
 			fs.writeFileSync('./program_zip.zip', result.body);

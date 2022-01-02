@@ -337,7 +337,7 @@ class Task {
 
 		try {
 			// Download zip file
-			let result = await api.call({url: '/api/task/'+this._id+'/downloadProgram', encoding: null});
+			let result = await api.call({url: '/api/automation/downloadProgram/+this._id, encoding: null});
 			if (result.response.statusCode == 404)
 				throw new TaskError("Task doesn't have a program file");
 			fs.writeFileSync('./program_zip.zip', result.body);
