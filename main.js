@@ -63,7 +63,8 @@ function createWindow () {
             "idFailed": "3",
             "idDone": "4",
             "autoStart": false,
-            "openDevTools": false
+            "openDevTools": false,
+            "windowOpened": false
         }
         credentialsTempalte.installPath = process.platform == 'win32'
             ? __dirname
@@ -74,13 +75,15 @@ function createWindow () {
         // Autostart robot if configured
         const rawConfig = fs.readFileSync(app.getPath("appData") + '/french-automation-robot/config/credentials.json');
         if (rawConfig && rawConfig !== '') {
-            const { autoStart, installPath, openDevTools } = JSON.parse(rawConfig);
+            const { autoStart, installPath, openDevTools, windowOpened } = JSON.parse(rawConfig);
 
             // Autostart
             if (autoStart) mainWindow.webContents.executeJavaScript(`document.getElementById("launchBtn").click();`);
 
             // Open developer console in robot pages
             if (openDevTools) robot.devTools = true;
+
+            if (windowOpened) robot.keepSession = true;
 
             // Set temp folder according to config file : "/opt/node/french-automation-robot" or "C://french-automation-robot-win32-x64"
             console.log("Install Path : " + installPath);
@@ -169,7 +172,8 @@ ipcMain.on('synchronous-message', (event, arg) => {
                             idDone,
                             autoStart,
                             installPath,
-                            openDevTools
+                            openDevTools,
+                            windowOpened
                         } = JSON.parse(rawConfig);
 
                         mainWindow.webContents.executeJavaScript(`
@@ -184,6 +188,7 @@ ipcMain.on('synchronous-message', (event, arg) => {
                             document.getElementById('f_autostart').checked = ${autoStart};
                             document.getElementById('f_install_path').value = '${installPath}';
                             document.getElementById('f_open_dev_tools').checked = ${openDevTools};
+                            document.getElementById('f_window_opened').checked = ${windowOpened};
                         `);
                     }
                 } catch(err) {
@@ -203,6 +208,12 @@ ipcMain.on('synchronous-message', (event, arg) => {
                 mainWindow.loadFile(__dirname + '/html/running.html')
                 mainWindow.webContents.executeJavaScript(`document.getElementById("id").innerHTML = "${robot.id}";`);
 
+                const rawConfig = fs.readFileSync(app.getPath("appData") + '/french-automation-robot/config/credentials.json');
+                if (rawConfig && rawConfig !== '') {
+                    const { windowOpened } = JSON.parse(rawConfig);
+                    robot._keepSession = windowOpened;
+                }
+                
                 robot.run();
                 console.log("Robot running...");
             break;

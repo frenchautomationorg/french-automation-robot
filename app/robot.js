@@ -44,6 +44,8 @@ class Robot {
 	get devTools() {return this._devTools}
 	set devTools(devTools) { this._devTools = devTools}
 
+	get keepSession() {return this._keepSession}
+	set keepSession(keepSession) { this._keepSession = keepSession}
 
 	//
 	// PRIVATE FUNCTIONS
@@ -129,11 +131,15 @@ class Robot {
 			delete this._task;
 		}
 
-		// Destroy window to reset current page and session
-		if (this.window) {
-			this.window.destroy();
-			delete this.window;
-			this._browserInitialized = false;
+		if (!this._keepSession) {
+
+			// Destroy window to reset current page and session
+			if (this.window) {
+				this.window.destroy();
+				delete this.window;
+				this._browserInitialized = false;
+			}
+			
 		}
 	}
 

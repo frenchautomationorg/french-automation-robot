@@ -84,16 +84,22 @@
                       <input class="form-control input" placeholder='' id="f_install_path" name="f_install_path" value="" type="text">
                   </div>
               </div>
-              <div data-field="f_autostart" class="col-xs-5">
+              <div data-field="f_autostart" class="col-xs-3">
                   <div class="form-group">
                       <label for="f_autostart"> Démarrage automatique </label>&nbsp;&nbsp;
                       <input class="input" id="f_autostart" name="f_autostart" value="" type="checkbox">
                   </div>
               </div>
-              <div data-field="f_open_dev_tools" class="col-xs-5">
+              <div data-field="f_open_dev_tools" class="col-xs-3">
                   <div class="form-group">
                       <label for="f_open_dev_tools"> Console développeur </label>&nbsp;&nbsp;
                       <input class="input" id="f_open_dev_tools" name="f_open_dev_tools" value="" type="checkbox">
+                  </div>
+              </div>
+              <div data-field="f_window_opened" class="col-xs-3">
+                  <div class="form-group">
+                      <label for="f_window_opened"> Conservation de session </label>&nbsp;&nbsp;
+                      <input class="input" id="f_window_opened" name="f_window_opened" value="" type="checkbox">
                   </div>
               </div>
 
@@ -112,7 +118,7 @@
           <div class="blue-line"></div>
           <div class="white-line"></div>
           <div class="footer-wrapper">
-            <span>French Automation IT &trade; - Version v1.0.0</span>
+            <span>French Automation IT &trade; - Version v2.0.0</span>
           </div>
       </footer>
     </div>
@@ -140,7 +146,8 @@
           idDone: document.getElementById('f_done').value,
           autoStart: document.getElementById('f_autostart').checked,
           installPath: installPath,
-          openDevTools: document.getElementById('f_open_dev_tools').checked
+          openDevTools: document.getElementById('f_open_dev_tools').checked,
+          windowOpened: document.getElementById('f_window_opened').checked
         });
       });
 
