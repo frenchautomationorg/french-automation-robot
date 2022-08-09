@@ -12,7 +12,7 @@ class Robot {
 		this._task = null;
 		this._browserInitialized = false;
 		this._sessionSet = false;
-		this._started = true;
+		this._started = false;
 	}
 
 	//
