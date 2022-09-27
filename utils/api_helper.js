@@ -158,7 +158,9 @@ module.exports = {
 					resolve();
 				}
 				else {
-					resolve(data.response.body[myEntity + 's'][0][myTargetField]);
+					console.log(data.response.body);
+					// resolve(data.response.body[myEntity + 's'][0][myTargetField]);
+					resolve(data.response.body[myEntity][0][myTargetField]);
 				}
 			})
 			.catch(function(error) {
